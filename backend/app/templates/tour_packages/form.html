@@ -228,6 +228,15 @@
 {% endblock %}
 
 {% block extra_js %}
+<script type="application/json" id="package-data">
+{{ {
+    "description": package.description if package else "",
+    "itinerary": package.itinerary if package else "",
+    "excludes": package.excludes if package else ""
+} | tojson }}
+</script>
+
+
 <script>
 $(document).ready(function () {
     $('#country').select2({
@@ -244,11 +253,13 @@ const descriptionEditor = new Quill('#description-editor', { theme: 'snow' });
 const itineraryEditor = new Quill('#itinerary-editor', { theme: 'snow' });
 const excludesEditor = new Quill('#excludes-editor', { theme: 'snow' });
 
-{% if package %}
-descriptionEditor.root.innerHTML = {{ package.description|default('', true)|tojson }};
-itineraryEditor.root.innerHTML = {{ package.itinerary|default('', true)|tojson }};
-excludesEditor.root.innerHTML = {{ package.excludes|default('', true)|tojson }};
-{% endif %}
+const packageData = JSON.parse(
+    document.getElementById("package-data").textContent
+);
+
+descriptionEditor.root.innerHTML = packageData.description || "";
+itineraryEditor.root.innerHTML = packageData.itinerary || "";
+excludesEditor.root.innerHTML = packageData.excludes || "";
 
 /* ======================
    FORM SUBMIT
