@@ -100,7 +100,7 @@
                     </a>
                 </li>
 
-                <li class="nav-item logout-btn d-flex align-items-center">
+                <!-- <li class="nav-item logout-btn d-flex align-items-center">
                     <a href="{{ url_for('logout') }}"
                     class="nav-link logout-user" onclick="confirmLogout(event)"
                     >
@@ -117,21 +117,21 @@
 
                         <p class="mb-0">Logout</p>
                     </a>
+                </li> -->
+                <li class="nav-item logout-btn d-flex align-items-center">
+                    <a href="javascript:void(0)"
+                    class="nav-link logout-user"
+                    data-route="{{ url_for('logout') }}"
+                    data-login-url="{{ url_for('login_page') }}"
+                    data-message="Are you sure you want to logout?">
+                        <div class="sidebar-nav-icon me-2">
+                            <!-- your SVG icon -->
+                        </div>
+                        <p class="mb-0">Logout</p>
+                    </a>
                 </li>
-
-
-
             </ul>
         </nav>
     </div>
 
 </aside>
-<script>
-    function confirmLogout(event) {
-        event.preventDefault();
-
-        if (confirm("Are you sure you want to logout?")) {
-            window.location.href = event.currentTarget.href;
-        }
-    }
-</script>

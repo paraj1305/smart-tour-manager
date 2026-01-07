@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from app.core.templates import templates
 from app.database.session import get_db
@@ -69,11 +69,23 @@ def login(
     return response
 
 
-@router.get("/logout", name="logout")
+# @router.get("/logout", name="logout")
+# def logout(request: Request):
+#     response = RedirectResponse(
+#         url=request.url_for("login_page"),
+#         status_code=status.HTTP_302_FOUND
+#     )
+#     response.delete_cookie(key="access_token")
+#     response.delete_cookie(key="user_role")
+    
+#     return response
+
+@router.post("/logout", name="logout")
 def logout(request: Request):
-    response = RedirectResponse(
-        url=request.url_for("login_page"),
-        status_code=status.HTTP_302_FOUND
-    )
-    response.delete_cookie(key="access_token")
+    """
+    Logout the user: delete cookies and respond with success.
+    """
+    response = JSONResponse({"success": True})  # AJAX-friendly response
+    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("user_role", path="/")
     return response
