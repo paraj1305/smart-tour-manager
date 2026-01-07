@@ -15,6 +15,7 @@ from app.schemas.tour_package import TourPackageCreate, TourPackageUpdate
 from sqlalchemy import or_
 
 from app.core.constants import COUNTRIES
+from app.utils.flash import flash_redirect
 
 router = APIRouter(prefix="/tour-packages", tags=["Tour Packages"])
 
@@ -142,7 +143,10 @@ def create_package(
             )
 
     db.commit()
-    return RedirectResponse(request.url_for("my_tour_list"), status_code=303)
+    return flash_redirect(
+        url=request.url_for("my_tour_list"),
+        message="Tour Package created successfully"
+    )
 
 @router.get("/{package_id}/edit", response_class=HTMLResponse, name="tour_package_edit_page")
 def edit_page(
@@ -195,9 +199,6 @@ def update_package(
     db: Session = Depends(get_db),
     current_user=Depends(company_only)
 ):
-    # -------------------------------------------------
-    # 1. Fetch package (ownership + not deleted)
-    # -------------------------------------------------
     package = db.query(TourPackage).filter(
         TourPackage.id == package_id,
         TourPackage.company_id == current_user.company.id,
@@ -210,9 +211,6 @@ def update_package(
             status_code=303
         )
 
-    # -------------------------------------------------
-    # 2. Update basic fields
-    # -------------------------------------------------
     update_data = TourPackageUpdate(
         title=title,
         description=description,
@@ -227,9 +225,6 @@ def update_package(
     for field, value in update_data.dict().items():
         setattr(package, field, value)
 
-    # -------------------------------------------------
-    # 3. HANDLE COVER IMAGE (IMPORTANT FIX)
-    # -------------------------------------------------
     if cover_image and cover_image.content_type.startswith("image/"):
 
         # Find existing cover
@@ -254,9 +249,6 @@ def update_package(
         )
         db.add(new_cover)
 
-    # -------------------------------------------------
-    # 4. HANDLE GALLERY IMAGES
-    # -------------------------------------------------
     if gallery_images:
         for img in gallery_images:
             if img and img.content_type.startswith("image/"):
@@ -268,19 +260,17 @@ def update_package(
                     )
                 )
 
-    # -------------------------------------------------
-    # 5. COMMIT
-    # -------------------------------------------------
     db.commit()
 
-    return RedirectResponse(
-        request.url_for("my_tour_list"),
-        status_code=303
+    return flash_redirect(
+        url=request.url_for("my_tour_list"),
+        message="Tour Package updated successfully"
     )
 
 @router.post("/{package_id}/delete", name="tour_package_delete")
 def delete_package(
     package_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user=Depends(company_only)
 ):
@@ -293,10 +283,10 @@ def delete_package(
         package.is_deleted = True
         db.commit()
 
-    return RedirectResponse("/tour-packages", status_code=303)
-
-
-
+    return flash_redirect(
+        url=request.url_for("my_tour_list"),
+        message="Tour Package deleted successfully"
+    )
 
 def save_image(file: UploadFile) -> str:
     filename = f"{uuid4().hex}_{file.filename.replace(' ', '_')}"
@@ -350,3 +340,28 @@ def delete_gallery_image(
     db.commit()
 
     return {"success": True}
+
+@router.get("/tours/{slug}", response_class=HTMLResponse)
+def tour_detail(
+    slug: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    tour = db.query(TourPackage)\
+        .filter(
+            TourPackage.id == slug,
+            TourPackage.is_deleted == False,
+            TourPackage.status == "active"
+        )\
+        .first()
+
+    if not tour:
+        raise HTTPException(status_code=404, detail="Tour not found")
+
+    return templates.TemplateResponse(
+        "tour_packages/tour_detail.html",
+        {
+            "request": request,
+            "tour": tour
+        }
+    )

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Tours{% endblock %}</title>
+    {% include 'partials/css.html' %}
+
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    {% block content %}{% endblock %}
+    {% include 'partials/js.html' %}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

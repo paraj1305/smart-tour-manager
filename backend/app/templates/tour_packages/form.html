@@ -30,8 +30,8 @@
 
 .gallery-image-wrapper .remove-btn {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: -8px;
+    right: -8px;
     background: rgba(255,0,0,0.7);
     border: none;
     color: white;
@@ -168,40 +168,38 @@
         <input type="file" name="gallery_images" id="galleryInput" accept="image/*" multiple>
         <p>Upload multiple images</p>
     </div>
-      <div id="existingGalleryWrapper" class="mt-3" style="display: none;">
-        <h6>Existing Images</h6>
-        <div id="existingGallery" class="d-flex gap-2 flex-wrap mt-2"></div>
-    </div>
+<!-- Existing Images -->
+<div id="existingGalleryWrapper" class="mt-3" style="display:none;">
+    <h6>Existing Images</h6>
+    <div id="existingGallery" class="d-flex gap-3 flex-wrap mt-3">
 
-    <!-- New Images -->
-    <div id="newGalleryWrapper" class="mt-3" style="display: none;">
-        <h6>New Images</h6>
-        <div id="newGallery" class="d-flex gap-2 flex-wrap mt-2"></div>
-    </div>
+        {% if package and package.gallery_images %}
+            {% for img in package.gallery_images %}
+                {% if img.image_type == "gallery" %}
+                <div class="gallery-image-wrapper">
+                    <img src="{{ url_for('static', path=img.image_path) }}"
+                         class="rounded border"
+                         style="width:70px;height:70px;object-fit:cover;">
 
-<h6 class="mt-3">Existing Images</h6>
-<div id="existingGallery" class="d-flex gap-2 flex-wrap mt-2">
-
-{% if package and package.gallery_images %}
-    {% for img in package.gallery_images %}
-        {% if img.image_type == "gallery" %}
-        <div class="gallery-image-wrapper">
-            <img src="{{ url_for('static', path=img.image_path) }}"
-                 class="rounded border"
-                 style="width:70px;height:70px;object-fit:cover;">
-
-            <button type="button"
-                    class="remove-btn delete-db-image"
-                    data-image-id="{{ img.id }}">
-                &times;
-            </button>
-        </div>
+                    <button type="button"
+                            class="remove-btn delete-db-image"
+                            data-image-id="{{ img.id }}">
+                        &times;
+                    </button>
+                </div>
+                {% endif %}
+            {% endfor %}
         {% endif %}
-    {% endfor %}
-{% endif %}
 
+    </div>
 </div>
+
+<!-- New Images -->
+<div id="newGalleryWrapper" class="mt-3" style="display:none;">
+    <h6>New Images</h6>
+    <div id="newGallery" class="d-flex gap-2 flex-wrap mt-2"></div>
 </div>
+
 
 </div>
 
@@ -371,26 +369,47 @@ $('#newGallery').on('click', '.remove-new-image', function () {
 });
 
 // Delete existing DB images
+// $('#existingGallery').on('click', '.delete-db-image', function () {
+//     const btn = $(this);
+//     const imageId = btn.data('image-id');
+
+//     if (!confirm("Delete this image permanently?")) return;
+
+//     $.ajax({
+//         url: `/tour-packages/gallery-image/${imageId}/delete`,
+//         type: 'POST',
+//         success: function () {
+//             btn.closest('.gallery-image-wrapper').fadeOut(200, function () {
+//                 $(this).remove();
+//                 updateGalleryHeaders();
+//             });
+//         },
+//         error: function () {
+//             alert("Failed to delete image");
+//         }
+//     });
+// });
+
 $('#existingGallery').on('click', '.delete-db-image', function () {
+
     const btn = $(this);
     const imageId = btn.data('image-id');
 
-    if (!confirm("Delete this image permanently?")) return;
-
-    $.ajax({
-        url: `/tour-packages/gallery-image/${imageId}/delete`,
-        type: 'POST',
-        success: function () {
-            btn.closest('.gallery-image-wrapper').fadeOut(200, function () {
-                $(this).remove();
-                updateGalleryHeaders();
-            });
-        },
-        error: function () {
-            alert("Failed to delete image");
+    confirmDelete(
+        `/tour-packages/gallery-image/${imageId}/delete`,
+        "Do you really want to delete this image permanently?",
+        "POST",
+        function () {
+            btn.closest('.gallery-image-wrapper')
+                .fadeOut(200, function () {
+                    $(this).remove();
+                    updateGalleryHeaders();
+                });
         }
-    });
+    );
+
 });
+
 
 // Sync selected files to input for form submission
 function syncGalleryInput() {

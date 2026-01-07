@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "layout-blank.html" %}
 
 {% block extra_css %}
 <style>
@@ -91,6 +91,9 @@ section.content {
                             </div>
                             {% endif %}
                         </div>
+
+                        <a href="{{ url_for('tour_detail', slug=tour.id) }}" class="stretched-link"></a>
+
 
                     </div>
                 </div>
