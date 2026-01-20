@@ -151,6 +151,7 @@ def manual_booking_datatable(
             """,
 
             "travel_details": f"""
+                <strong>{booking.tour_package.title}</strong><br>
                 📅 {booking.travel_date.strftime("%d-%m-%Y")}<br>
                 ⏰ {booking.travel_time or "-"}<br>
                 📍 {booking.pickup_location or "-"}
@@ -333,22 +334,55 @@ def tour_package_availability_page(
     )
 
 
+# @router.get("/booked-dates/{package_id}", name="get_booked_dates")
+# def booked_dates(package_id: int, db: Session = Depends(get_db)):
+#     bookings = (
+#         db.query(ManualBooking)
+#         .filter(
+#             ManualBooking.tour_package_id == package_id
+#         )
+#         .all()
+#     )
+
+#     data = []
+#     for b in bookings:
+#         data.append({
+#             "guest_name": b.guest_name,
+#             "pickup_location": b.pickup_location or "-",
+#             "travel_date": b.travel_date.strftime("%Y-%m-%d")
+#         })
+
+#     return {"bookings": data}
+
+
 @router.get("/booked-dates/{package_id}", name="get_booked_dates")
-def booked_dates(package_id: int, db: Session = Depends(get_db)):
+def get_booked_dates(package_id: int, db: Session = Depends(get_db)):
     bookings = (
         db.query(ManualBooking)
         .filter(
-            ManualBooking.tour_package_id == package_id
+            ManualBooking.tour_package_id == package_id,
+            ManualBooking.is_deleted == False
         )
         .all()
     )
 
-    data = []
+    bookings_data = []
+    booked_dates = []
+
     for b in bookings:
-        data.append({
+        date_str = b.travel_date.strftime("%Y-%m-%d")
+
+        booked_dates.append(date_str)
+
+        bookings_data.append({
             "guest_name": b.guest_name,
-            "pickup_location": b.pickup_location or "-",
-            "travel_date": b.travel_date.strftime("%Y-%m-%d")
+            "pickup_location": b.pickup_location or "",
+            "travel_date": date_str,
+            "travel_time": b.travel_time or "",
+            
         })
 
-    return {"bookings": data}
+    return {
+        "booked_dates": booked_dates,
+        "bookings": bookings_data
+    }

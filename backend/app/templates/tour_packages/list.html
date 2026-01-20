@@ -25,10 +25,7 @@
                 <a href="{{ url_for('tour_package_create_page') }}" class="btn btn-submit">
                     Add Tour Package
                 </a>
-
             </div>
-
-
         </div>
 
         <hr>
@@ -49,6 +46,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<!--  -->
+
 <script>
     $(document).on('click', '.confirm-tour-delete', function (e) {
         e.preventDefault();
