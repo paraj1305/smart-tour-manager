@@ -30,7 +30,7 @@
     <div class="col-md-3 mb-3">
         <label class="form-label fw-semibold">Guest Name</label>
         <input type="text" name="guest_name" class="form-control"
-               value="{{ booking.guest_name if booking else '' }}">
+               value="{{ booking.customer.guest_name if booking else '' }}">
     </div>
 
 <div class="col-md-4 mb-3">
@@ -43,7 +43,7 @@
                 style="max-width:110px;">
             {% for code,name in country_codes %}
             <option value="{{ code }}"
-                {% if booking and booking.country_code == code %}
+                {% if booking and booking.customer.country_code == code %}
                     selected
                 {% endif %}>
                 {{ code }}
@@ -54,7 +54,7 @@
         <input type="text"
                name="phone"
                class="form-control"
-               value="{{ booking.phone if booking else '' }}"
+               value="{{ booking.customer.phone if booking else '' }}"
                placeholder="Phone number">
     </div>
 </div>
@@ -63,7 +63,7 @@
     <div class="col-md-3 mb-3">
         <label class="form-label fw-semibold">Email</label>
         <input type="email" name="email" class="form-control"
-               value="{{ booking.email if booking else '' }}">
+               value="{{ booking.customer.email if booking else '' }}">
     </div>
 
     <div class="col-md-2 mb-3">

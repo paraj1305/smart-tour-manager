@@ -1,6 +1,6 @@
 def booking_confirmation_message(booking):
     return (
-        f"Hello {booking.guest_name} 👋\n\n"
+        f"Hello {booking.customer.guest_name} 👋\n\n"
         f"✅ *Your booking is confirmed!*\n\n"
         f"📍 Package: {booking.tour_package.title}\n"
         f"📅 Date: {booking.travel_date}\n"
