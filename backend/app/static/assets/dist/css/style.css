@@ -75,7 +75,8 @@ a:hover {
 }
 
 .btn-submit {
-    padding: 8px 16px;
+    /* padding: 8px 16px; */
+    padding: 7.2px 16px;
     width: auto;
     border-radius: 4px;
     border: 1px solid #15717e;
@@ -442,7 +443,23 @@ button:focus {
     border: 1px solid #ccc;
     border-radius: 8px;
     cursor: pointer;
+    padding: 5px;
     position: relative;
+}
+
+.profile-picture #previewImage {
+    border-radius: 6px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-picture-inner-box {
+    display: flex;
+    height: -webkit-fill-available;
+    width: -webkit-fill-available;
+    align-items: center;
+    justify-content: center;
 }
 
 .profile-picture input[type="file"] {
@@ -1046,6 +1063,11 @@ select.form-select {
     background-position: calc(100% - 10px);
     background-size: 20px;
     cursor: pointer;
+}
+
+select.form-select+.form-control {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
 }
 
 .permissions-for-customer-form .card-body {
@@ -1912,6 +1934,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 
 .tour-packages-card {
     margin-top: 0px;
+
 }
 
 .tour-packages-card .tour-packages-list {
@@ -1920,20 +1943,22 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     gap: 20px;
 }
 
-.tour-packages-item {}
+
 
 .tour-packages-card .tour-card {
     background: #fff;
     border-radius: 12px;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-    transition: all 0.25s ease;
+    border: 1px solid #ced4da;
     height: 100%;
+    position: relative;
+    transition: all 0.25s ease;
 }
 
 .tour-packages-card .tour-card:hover {
-
-    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
+    border-color: #15717e;
 }
 
 .tour-packages-card .tour-cover {
@@ -1944,7 +1969,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 
 .tour-packages-card .tour-cover img {
     width: 100%;
-    height: 100%;
+    height: 200px;
     object-fit: cover;
 }
 
@@ -1959,10 +1984,12 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 
 .tour-packages-card .status-badge {
     position: absolute;
-    top: 16px;
-    right: 16px;
+    bottom: 16px;
+    left: 16px;
     padding: 4px 10px;
+    font-weight: 500;
     font-size: 11px;
+    border: 1px solid #fff;
     border-radius: 20px;
     color: #fff;
     text-transform: uppercase;
@@ -1973,11 +2000,12 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 }
 
 .tour-packages-card .status-badge.inactive {
-    background: #6c757d;
+    background: #ab0101;
 }
 
 .tour-packages-card .tour-body {
     padding: 16px;
+    height: -webkit-fill-available;
     display: flex;
     flex-direction: column;
 }
@@ -1985,6 +2013,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 .tour-packages-card .tour-title {
     font-size: 21px;
     font-weight: 600;
+    line-height: 1.4;
     margin-bottom: 8px;
 }
 
@@ -1992,9 +2021,10 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     display: flex;
     justify-content: space-between;
     font-size: 14px;
-    gap: 15px;
+    gap: 10px;
+    flex-direction: column;
     color: #000;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .tour-packages-card .price {
@@ -2006,7 +2036,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 .tour-packages-card .tour-gallery {
     display: flex;
     align-items: center;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
 }
 
 .tour-packages-card .tour-gallery img {
@@ -2027,13 +2057,52 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 .tour-packages-card .tour-actions {
     margin-top: auto;
     display: flex;
+    gap: 15px;
+    flex-direction: column;
     justify-content: space-between;
 }
 
-.tour-packages-card .btn {
-    padding: 4px 10px;
-    font-size: 14px;
-    font-weight: 500;
+.tour-packages-card .tour-actions .tour-actions-inner {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    justify-content: space-between;
+}
+
+.tour-packages-card .tour-actions .tour-actions-inner.tour-actions-inner-bottom {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    gap: 10px;
+}
+
+.tour-packages-card .tour-actions .tour-actions-inner .tour-top-btn {
+    display: flex;
+    width: calc(50% - 7.5px);
+}
+
+
+.tour-packages-card .tour-actions .tour-actions-inner .tour-top-btn .btn-submit {
+    width: 100%;
+}
+
+.tour-packages-card .tour-actions .tour-actions-inner-bottom .btn {
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #000;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12),
+        0 0px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.5s ease;
+}
+
+.tour-packages-card .tour-actions .tour-actions-inner-bottom .btn:hover {
+    border-color: #15717e;
+}
+
+.tour-packages-card .no-tours-found p {
+    margin: 0px;
+    font-size: 16px;
 }
 
 .tour-packages-header {
@@ -2043,7 +2112,10 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 .tour-packages-header .form-control {
     height: 40px;
     max-width: 260px;
-    margin-left: auto;
+}
+
+.tour-packages-header .tour-packages-title {
+    margin-right: auto;
 }
 
 .rich-editor {
@@ -2094,6 +2166,45 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     font-weight: bold;
 }
 
+.create-tour-assi-drivers .select2 .select2-selection {
+    border-color: #ced4da;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.create-tour-assi-drivers .select2.select2-container--focus .select2-selection {
+    border-color: #15717e;
+}
+
+.create-tour-assi-drivers .select2 .select2-selection__rendered {
+    padding: 5px;
+}
+
+.create-tour-assi-drivers .select2 .select2-selection__rendered .select2-selection__choice {
+    margin: 5px 6px 0 0 !important;
+    background-color: transparent;
+    color: #000;
+    font-size: 14px;
+}
+
+.create-tour-assi-drivers .select2 .select2-selection__rendered .select2-selection__choice .select2-selection__choice__remove {
+    color: #333;
+}
+
+.create-tour-assi-drivers .select2 .select2-selection__rendered .select2-search.select2-search--inline .select2-search__field {
+    margin-top: 0px;
+}
+
+.create-tour-assi-drivers .select2 .select2-selection__rendered li:not(:first-child) input {
+    margin: 5px 0 0 !important;
+}
+
+#manual-booking-form .manual-booking-title {
+    font-size: 21px;
+    font-weight: 600;
+}
+
 @media (max-width: 1499.55px) {
     .admin-order-history-page .order-history-select-fild {
         flex-wrap: wrap;
@@ -2108,6 +2219,12 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
         width: 100%;
     }
 } */
+
+@media (max-width: 1299.55px) {
+    .tour-packages-card .tour-packages-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
 
 @media (max-width: 1199.55px) {
     .login-logo .brand-img {
@@ -2141,6 +2258,20 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     .select-driver-with-calendar .driver-select-calendar-box {
         gap: 8px;
     }
+
+    .tour-packages-header {
+        flex-wrap: wrap;
+    }
+
+    .tour-packages-header .tour-packages-title {
+        width: 100%;
+    }
+
+    .tour-packages-header .btn-submit {
+        margin-left: auto;
+    }
+
+
 }
 
 @media (min-width: 992.55px) {
@@ -2202,6 +2333,10 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 
     .tour-packages-card .tour-packages-list {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tour-packages-card .tour-actions .tour-actions-inner-top .btn-submit {
+        font-size: 14px;
     }
 }
 
@@ -2483,7 +2618,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     form.rounded,
     .form-data-rounded.rounded {
         border-radius: 12px !important;
-        padding: 15px 8px !important;
+        padding: 15px 3px !important;
     }
 
     form .raw.d-flex {
@@ -3145,6 +3280,11 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 
     .tour-packages-header {
         flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .tour-packages-card .no-tours-found p {
+        font-size: 14px;
     }
 
     .tour-packages-header .form-control {
@@ -3153,7 +3293,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     }
 
     .tour-packages-header .btn-submit {
-        margin-left: auto;
+        width: 100%;
     }
 
     .upload-box {
@@ -3166,6 +3306,10 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 
     .tour-packages-card .tour-body {
         padding: 12px;
+    }
+
+    .tour-packages-card .tour-card {
+        border-radius: 8px;
     }
 
     .tour-packages-card .tour-title {
@@ -3187,8 +3331,56 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     }
 
     .tour-packages-card .tour-packages-list {
-
         gap: 15px;
+    }
+
+    select.form-select {
+        border-top-left-radius: 6px;
+        border-bottom-left-radius: 6px;
+    }
+
+    select.form-select+.form-control {
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+    }
+
+    .profile-picture-upload {
+        padding: 0px 12px !important;
+    }
+
+    .page-bottom-action-btn {
+        padding: 0px 12px;
+    }
+
+    .tour-packages-card .status-badge {
+        bottom: 12px;
+        left: 12px;
+    }
+
+    .tour-packages-card .tour-actions .tour-actions-inner.tour-actions-inner-bottom {
+        top: 12px;
+        right: 12px;
+        gap: 8px;
+    }
+
+    .tour-packages-card .tour-actions .tour-actions-inner-bottom .btn {
+        padding: 6px;
+    }
+
+    .tour-packages-card .tour-actions .tour-actions-inner-bottom .btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .tour-packages-card .tour-actions .tour-actions-inner-top .btn-submit {
+        font-size: 13px;
+        padding: 5px 10px;
+        line-height: normal;
+    }
+
+    #manual-booking-form .manual-booking-title {
+        font-size: 18px;
+        padding: 0 12px;
     }
 }
 
@@ -3204,29 +3396,25 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 }
 
 
-/* =========================================================
-   FLATPICKR – PRO RESPONSIVE / PIXEL PERFECT THEME
-   Scope: .custom-flatpickr
-========================================================= */
-
 .custom-flatpickr {
     width: 100%;
-    max-width: 560px;
+    max-width: 330px;
     margin: 0 auto;
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 10px;
 }
 
-/* ---------- Calendar Container ---------- */
-.custom-flatpickr .flatpickr-calendar {
+/*
+.flatpickr-calendar {
     width: 100% !important;
     border-radius: 16px;
+    padding: 10px;
     border: 1px solid #e5e7eb;
     background: #ffffff;
     padding: 16px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-/* ---------- Month Header ---------- */
+
 .custom-flatpickr .flatpickr-months {
     display: flex;
     align-items: center;
@@ -3252,7 +3440,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     background: #f3f4f6;
 }
 
-/* ---------- Weekdays ---------- */
+
 .custom-flatpickr .flatpickr-weekdays {
     margin-bottom: 6px;
 }
@@ -3264,12 +3452,12 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     text-transform: uppercase;
 }
 
-/* ---------- Days Grid ---------- */
+
 .custom-flatpickr .flatpickr-days {
     padding-top: 8px;
 }
 
-/* ---------- Day Cell ---------- */
+
 .custom-flatpickr .flatpickr-day {
     width: 56px;
     height: 56px;
@@ -3282,17 +3470,17 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     transition: all 0.2s ease;
 }
 
-/* ---------- Hover ---------- */
+
 .custom-flatpickr .flatpickr-day:hover {
     background: #eef2ff;
 }
 
-/* ---------- Today ---------- */
+
 .custom-flatpickr .flatpickr-day.today {
     border: 2px solid #155799;
 }
 
-/* ---------- Selected ---------- */
+
 .custom-flatpickr .flatpickr-day.selected,
 .custom-flatpickr .flatpickr-day.selected:hover {
     background: #159957;
@@ -3300,7 +3488,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     color: #ffffff;
 }
 
-/* ---------- Disabled ---------- */
+
 .custom-flatpickr .flatpickr-day.disabled,
 .custom-flatpickr .flatpickr-day.flatpickr-disabled {
     background: #f9fafb;
@@ -3308,17 +3496,15 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     cursor: not-allowed;
 }
 
-/* ---------- Outside Month ---------- */
+
 .custom-flatpickr .flatpickr-day.prevMonthDay,
 .custom-flatpickr .flatpickr-day.nextMonthDay {
     color: #d1d5db;
 }
 
-/* =========================================================
-   RESPONSIVE BREAKPOINTS
-========================================================= */
 
-/* ---------- Tablets ---------- */
+
+
 @media (max-width: 991px) {
     .custom-flatpickr {
         max-width: 480px;
@@ -3332,7 +3518,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     }
 }
 
-/* ---------- Mobile ---------- */
+
 @media (max-width: 576px) {
     .custom-flatpickr {
         max-width: 100%;
@@ -3356,9 +3542,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     }
 }
 
-/* =========================================================
-   Calendar Container
-========================================================= */
+
 #calendar {
     width: 100%;
     height: 90vh;
@@ -3367,9 +3551,6 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     border-radius: 8px;
 }
 
-/* =========================================================
-   Header Toolbar
-========================================================= */
 .fc-toolbar {
     background: linear-gradient(175deg, #159957, #155799);
     padding: 14px 18px;
@@ -3382,7 +3563,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     color: #ffffff;
 }
 
-/* Buttons */
+
 .fc-button {
     background: #ffffff !important;
     color: #155799 !important;
@@ -3400,9 +3581,6 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     color: #159957 !important;
 }
 
-/* =========================================================
-   Calendar Grid
-========================================================= */
 .fc-daygrid-day {
     background: #f8fbff;
     cursor: pointer;
@@ -3412,20 +3590,20 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     background: #e9f5ff;
 }
 
-/* Weekday header */
+
 .fc-col-header-cell {
     background: #f1f8ff;
     font-weight: 600;
     color: #155799;
 }
 
-/* Date number */
+
 .fc-daygrid-day-number {
     font-weight: 600;
     color: #155799;
 }
 
-/* Today */
+
 .fc-day-today {
     background: rgba(21, 153, 87, 0.15) !important;
 }
@@ -3434,9 +3612,6 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     color: #159957;
 }
 
-/* =========================================================
-   Booking Events
-========================================================= */
 .fc-event {
     background: linear-gradient(175deg, #159957, #155799) !important;
     border: none !important;
@@ -3453,7 +3628,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     transition: 0.15s ease;
 }
 
-/* Booking content */
+
 .fc-booking-event {
     white-space: normal;
     padding: 4px;
@@ -3470,43 +3645,41 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     color: #ffeaa7;
 }
 
-/* =========================================================
-   Disabled States
-========================================================= */
 
-/* Past dates */
+
 .fc-disabled-day {
     background: #f1f1f1 !important;
     opacity: 0.6;
 }
 
-/* Fully booked dates */
+
 .fc-booked-day {
-    background: #ffeaea !important; /* light red */
+    background: #ffeaea !important;
+    
     opacity: 0.85;
 }
 
-/* Disable date click only */
+
 .fc-disabled-day .fc-daygrid-day-frame,
 .fc-booked-day .fc-daygrid-day-frame {
     pointer-events: none;
 }
 
-/* Keep event clickable on booked day */
+
 .fc-booked-day .fc-event {
     pointer-events: auto;
     cursor: pointer;
 }
 
-/* Date number color for booked day */
+
 .fc-booked-day .fc-daygrid-day-number {
     color: #dc3545;
     font-weight: 700;
 }
 
-/* Optional label style if no event exists */
+
 .fc-booked-day::after {
-    /* content: "Fully Booked"; */
+    
     font-size: 10px;
     color: #dc3545;
     display: block;
@@ -3515,9 +3688,7 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     font-weight: 600;
 }
 
-/* =========================================================
-   Weekend Colors
-========================================================= */
+
 .fc .fc-day-sun .fc-col-header-cell-cushion,
 .fc .fc-day-sat .fc-col-header-cell-cushion {
     color: #dc3545;
@@ -3529,4 +3700,4 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
 .fc .fc-day-thu .fc-col-header-cell-cushion,
 .fc .fc-day-fri .fc-col-header-cell-cushion {
     color: #198754;
-}
+} /*
