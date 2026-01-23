@@ -17,7 +17,7 @@ from app.auth.dependencies import admin_only, get_current_user
 from app.models.company import Company
 from app.models.user import User
 from app.schemas.company import CompanyCreate, CompanyUpdate
-from app.core.constants import COUNTRIES, CURRENCIES
+from app.core.constants import COUNTRIES, CURRENCIES, COUNTRY_CODES
 from app.utils.flash import flash_redirect
 from app.services.email_service import send_company_created_email
 
@@ -88,7 +88,7 @@ def company_datatable(
         data.append({
             "company_name": company.company_name,
             "email": company.user.email,
-            "phone": company.phone,
+            "phone": f"{company.country_code} {company.phone}",
             "status": company.status,
             "actions": f"""
                 <a href="{request.url_for('company_edit_page', company_id=company.id)}"
@@ -138,7 +138,7 @@ def create_page(
     if isinstance(current_user, RedirectResponse):
         return current_user
 
-    return render_form(request, currencies=CURRENCIES, countries=COUNTRIES)
+    return render_form(request, currencies=CURRENCIES, countries=COUNTRIES, country_codes=COUNTRY_CODES)
 
 @router.post("/create", name="company_create")
 async def create_company(
@@ -146,6 +146,7 @@ async def create_company(
     background_tasks: BackgroundTasks,
     company_name: str = Form(...),
     email: str = Form(...),
+    country_code: str = Form(...),
     phone: str = Form(""),
     currency: str = Form(...),
     country: str = Form(None),
@@ -160,6 +161,7 @@ async def create_company(
             company_name=company_name,
             country=country,
             email=email,
+            country_code=country_code,
             phone=phone,
             currency=currency,
         )
@@ -199,7 +201,8 @@ async def create_company(
     company = Company(
         user_id=user.id,
         company_name=company_name,
-        country=country,
+        country=country,    
+        country_code=country_code,
         phone=phone,
         currency=currency,
         status="active",
@@ -243,9 +246,11 @@ def edit_page(
         company=company,
         currencies=CURRENCIES,
         countries=COUNTRIES,
+        country_codes=COUNTRY_CODES,
         form={
             "company_name": company.company_name,
-            "email": company.user.email,
+            "email": company.user.email,    
+            "country_code": company.country_code,
             "phone": company.phone,
             "currency": company.currency,
             "country": company.country
@@ -257,6 +262,7 @@ def update_company(
     company_id: int,
     request: Request,
     company_name: str = Form(...),
+    country_code: str = Form(...),  
     phone: str = Form(""),
     status: str = Form(...),
     country: str = Form(None),
@@ -272,6 +278,7 @@ def update_company(
         return redirect_with_message(request, "Company not found")
 
     company.company_name = company_name
+    company.country_code = country_code
     company.phone = phone
     company.status = status
     company.currency = currency
@@ -331,6 +338,7 @@ def my_profile(
         form={
             "company_name": company.company_name,
             "email": current_user.email,
+            "country_code": company.country_code,
             "phone": company.phone,
             "currency": company.currency,
             "country": company.country
@@ -342,6 +350,7 @@ def update_my_profile(
     request: Request,
 
     company_name: str = Form(...),
+    country_code: str = Form(...),
     phone: str = Form(None),
     currency: str = Form(...),
     country: str = Form(None),
@@ -357,6 +366,7 @@ def update_my_profile(
     try:
         form = CompanyUpdate(
             company_name=company_name,
+            country_code=country_code,
             phone=phone or None,
             status=company.status,
             currency=currency,
@@ -371,6 +381,7 @@ def update_my_profile(
             countries=COUNTRIES,
             form={
                 "company_name": company_name,
+                "country_code": country_code,
                 "phone": phone,
                 "country": country
             },
@@ -390,6 +401,7 @@ def update_my_profile(
 
     # ✅ Update fields
     company.company_name = form.company_name
+    company.country_code = form.country_code
     company.phone = form.phone
     company.currency = form.currency
     company.country = form.country

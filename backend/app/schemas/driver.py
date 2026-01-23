@@ -6,6 +6,7 @@ class DriverBase(BaseModel):
     vehicle_type: str
     vehicle_number: str
     seats: int
+    country_code: str
     phone: str
     image: Optional[str] = None
 

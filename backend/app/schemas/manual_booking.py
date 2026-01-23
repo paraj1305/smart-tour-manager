@@ -5,6 +5,7 @@ from typing import Optional
 
 class ManualBookingCreate(BaseModel):
     guest_name: str
+    country_code: str
     phone: str
     email: Optional[EmailStr] = None
     pickup_location: Optional[str] = None
@@ -17,6 +18,7 @@ class ManualBookingCreate(BaseModel):
 
 class ManualBookingUpdate(BaseModel):
     guest_name: str
+    country_code: str
     phone: str
     email: Optional[EmailStr] = None
     pickup_location: Optional[str] = None
@@ -29,6 +31,7 @@ class ManualBookingUpdate(BaseModel):
 class ManualBookingOut(BaseModel):
     id: int
     guest_name: str
+    country_code: str
     phone: str
     email: Optional[EmailStr]
     pickup_location: Optional[str]

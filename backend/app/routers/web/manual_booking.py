@@ -11,10 +11,11 @@ from app.core.templates import templates
 from app.auth.dependencies import admin_only, company_only
 from app.utils.flash import flash_redirect
 from typing import Optional, List
-from sqlalchemy import func,and_
+from sqlalchemy import func,and_,or_
 from datetime import date
-
-
+from twilio.rest import Client
+from app.core.constants import COUNTRY_CODES
+from app.services.whatsapp_service import send_whatsapp_booking_confirmation, format_phone
 
 router = APIRouter(prefix="/manual-bookings", tags=["Manual Booking"])
 
@@ -42,7 +43,8 @@ def manual_booking_create_page(
         db.query(TourPackage)
         .filter(
             TourPackage.company_id == company.id,
-            TourPackage.is_deleted == False
+            TourPackage.is_deleted == False,
+            TourPackage.status == "active"
         )
         .all()
     )
@@ -74,19 +76,22 @@ def manual_booking_create_page(
             "request": request,
             "packages": packages,
             "company": company,
+            "country_codes": COUNTRY_CODES,
             "selected_package": selected_package,
             "travel_date": travel_date,
             "is_edit": False,
         }
     )
 
-
 @router.post("/create", name="manual_booking_create")
 def create_manual_booking(
     request: Request,
     guest_name: str = Form(...),
+    country_code: str = Form(...),
     phone: str = Form(...),
     email: str = Form(None),
+    adults: int = Form(...),
+    kids: int = Form(...),
     pickup_location: str = Form(None),
     tour_package_id: int = Form(...),
     driver_id: int = Form(None),
@@ -97,6 +102,26 @@ def create_manual_booking(
     db: Session = Depends(get_db),
     current_user=Depends(admin_only),
 ):
+
+    # ✅ DRIVER CONFLICT CHECK
+    if driver_id:
+        conflict = (
+            db.query(ManualBooking)
+            .filter(
+                ManualBooking.driver_id == driver_id,
+                ManualBooking.travel_date == travel_date,
+                ManualBooking.is_deleted == False
+            )
+            .first()
+        )
+
+        if conflict:
+            return flash_redirect(
+                url=request.url_for("manual_booking_create"),
+                message="Selected driver is already booked for this date.",
+                category="error",
+            )
+
     remaining_amount = total_amount - advance_amount
 
     payment_status = (
@@ -107,8 +132,11 @@ def create_manual_booking(
 
     booking = ManualBooking(
         guest_name=guest_name,
+        country_code=country_code,
         phone=phone,
         email=email,
+        adults=adults,
+        kids=kids,
         pickup_location=pickup_location,
         tour_package_id=tour_package_id,
         driver_id=driver_id,
@@ -122,6 +150,14 @@ def create_manual_booking(
 
     db.add(booking)
     db.commit()
+    db.refresh(booking)
+
+    try:
+        phone_number = format_phone(country_code, phone)
+        send_whatsapp_booking_confirmation(phone_number, booking)
+
+    except Exception as e:
+       print("WhatsApp send failed for booking %s", booking.id)
 
     return flash_redirect(
         url=request.url_for("manual_booking_list"),
@@ -139,7 +175,12 @@ def manual_booking_datatable(
 ):
     bookings = (
         db.query(ManualBooking)
-        .filter(ManualBooking.is_deleted == False)
+        .filter(
+            ManualBooking.is_deleted == False,
+            ManualBooking.tour_package.has(
+                TourPackage.company_id == current_user.id
+            )
+        )
         .order_by(ManualBooking.id.desc())
         .all()
     )
@@ -155,8 +196,9 @@ def manual_booking_datatable(
             "id": booking.id,
            "guest_details": f"""
                 <strong>{booking.guest_name}</strong><br>
-                📞 {booking.phone}<br>
-                ✉️ {booking.email or "-"}
+                📞 {booking.country_code}{booking.phone}<br>
+                ✉️ {booking.email or "-"}<br>
+                👨‍👩‍👧‍👦 {booking.adults} - {booking.kids}
             """,
 
             "travel_details": f"""
@@ -167,9 +209,9 @@ def manual_booking_datatable(
             """,
 
             "payment_details": f"""
-                <strong>{company.currency} {booking.total_amount}</strong><br>
-                Advance: {company.currency} {booking.advance_amount}<br>
-                Remaining: {company.currency} {booking.remaining_amount}<br>
+                <strong>{booking.tour_package.currency} {booking.total_amount}</strong><br>
+                Advance: {booking.tour_package.currency} {booking.advance_amount}<br>
+                Remaining: {booking.tour_package.currency} {booking.remaining_amount}<br>
             """,
             
             "status": "Paid" if booking.remaining_amount == 0 else "Pending",
@@ -216,7 +258,7 @@ def edit_manual_booking(
 
     packages = (
         db.query(TourPackage)
-        .filter(TourPackage.is_deleted == False)
+        .filter(TourPackage.is_deleted == False,TourPackage.status == "active")
         .all()
     )
 
@@ -252,6 +294,7 @@ def edit_manual_booking(
             "request": request,
             "booking": booking,
             "packages": packages,
+            "country_codes": COUNTRY_CODES,
             "drivers": drivers,   
             "company": company,
         }
@@ -262,8 +305,11 @@ def update_manual_booking(
     request: Request,
     booking_id: int,
     guest_name: str = Form(...),
+    adults: int = Form(...),
+    kids: int = Form(...),
     tour_package_id: int = Form(...),
     driver_id: int = Form(None),
+    country_code: str = Form(...),
     phone: str = Form(...),
     email: str = Form(None),
     pickup_location: str = Form(None),
@@ -274,35 +320,39 @@ def update_manual_booking(
     db: Session = Depends(get_db),
     current_user=Depends(admin_only),
 ):
-    
+
     booking = db.query(ManualBooking).get(booking_id)
 
-    conflict = (
-        db.query(ManualBooking)
-        .filter(
-            ManualBooking.id != booking.id, 
-            ManualBooking.tour_package_id == booking.tour_package_id,
-            ManualBooking.travel_date == travel_date
+    # ✅ DRIVER CONFLICT CHECK
+    if driver_id:
+        conflict = (
+            db.query(ManualBooking)
+            .filter(
+                ManualBooking.id != booking_id,
+                ManualBooking.driver_id == driver_id,
+                ManualBooking.travel_date == travel_date,
+                ManualBooking.is_deleted == False
+            )
+            .first()
         )
-        .first()
-    )
 
-    if conflict:
-        return flash_redirect(
-            url=request.url_for(
-                "manual_booking_edit",
-                booking_id=booking.id
-            ),
-            message="This package is already booked for the selected date.",
-            category="error",
-        )
-        
-        
-    booking = db.query(ManualBooking).get(booking_id)
+        if conflict:
+            return flash_redirect(
+                url=request.url_for(
+                    "manual_booking_edit",
+                    booking_id=booking_id
+                ),
+                message="Selected driver is already booked for this date.",
+                category="error",
+            )
 
+    # ✅ UPDATE BOOKING
     booking.guest_name = guest_name
+    booking.country_code = country_code
     booking.phone = phone
     booking.email = email
+    booking.adults = adults
+    booking.kids = kids
     booking.tour_package_id = tour_package_id
     booking.driver_id = driver_id
     booking.pickup_location = pickup_location
@@ -322,7 +372,7 @@ def update_manual_booking(
 
     return flash_redirect(
         url=request.url_for("manual_booking_list"),
-        message="booking updated successfully.",
+        message="Booking updated successfully.",
     )
 
 @router.post("/{booking_id}/delete", name="manual_booking_delete")
@@ -492,6 +542,59 @@ def get_available_drivers(
         {
             "id": d.id,
             "name": d.name,
+            "country_code": d.country_code,
+            "phone": d.phone_number,
+            "vehicle_type": d.vehicle_type,
+            "vehicle_number": d.vehicle_number,
+            "seats": d.seats
+        }
+        for d in drivers
+    ]
+
+@router.get("/all-drivers/{package_id}/{travel_date}")
+def get_all_package_drivers(
+    package_id: int,
+    travel_date: date,
+    db: Session = Depends(get_db),
+    current_user=Depends(company_only),
+):
+    company_id = current_user.company.id
+
+    # 1️⃣ Drivers already booked on this date (ANY package)
+    booked_driver_ids = (
+        db.query(ManualBooking.driver_id)
+        .filter(
+            ManualBooking.travel_date == travel_date,
+            ManualBooking.driver_id.isnot(None),
+            ManualBooking.is_deleted == False
+        )
+        .all()
+    )
+    booked_driver_ids = [d[0] for d in booked_driver_ids]
+
+    # 2️⃣ All drivers of company
+    #    - assigned to any package OR no package
+    #    - NOT booked on that date
+    drivers = (
+        db.query(Driver)
+        .outerjoin(
+            TourPackageDriver,
+            TourPackageDriver.driver_id == Driver.id
+        )
+        .filter(
+            Driver.company_id == company_id,
+            Driver.is_deleted == False,
+            ~Driver.id.in_(booked_driver_ids)
+        )
+        .distinct()
+        .all()
+    )
+
+    return [
+        {
+            "id": d.id,
+            "name": d.name,
+            "country_code": d.country_code,
             "phone": d.phone_number,
             "vehicle_type": d.vehicle_type,
             "vehicle_number": d.vehicle_number,

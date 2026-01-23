@@ -15,7 +15,7 @@ from app.models.tour_package import TourPackage, TourPackageGalleryImage, TourPa
 from app.schemas.tour_package import TourPackageCreate, TourPackageUpdate
 from sqlalchemy import or_
 from app.models.driver import Driver
-from app.core.constants import COUNTRIES
+from app.core.constants import COUNTRIES, CURRENCIES
 from app.utils.flash import flash_redirect
 from app.models.manual_booking import ManualBooking
 
@@ -47,6 +47,8 @@ def my_tour_list(
     db: Session = Depends(get_db),
     current_user=Depends(company_only),
 ):
+    if isinstance(current_user, RedirectResponse):
+        return current_user
     company = current_user.company
 
     query = db.query(TourPackage).filter(
@@ -107,11 +109,14 @@ def create_page(
     db: Session = Depends(get_db),
     current_user=Depends(company_only)
 ):
+    if isinstance(current_user, RedirectResponse):
+        return current_user
+
     drivers = (
         db.query(Driver)
         .filter(
             Driver.company_id == current_user.company.id,
-            Driver.is_deleted == False
+            Driver.is_deleted == False,
         )
         .all()
     )
@@ -122,10 +127,10 @@ def create_page(
             "request": request,
             "drivers": drivers,
             "assigned_driver_ids": [],
-            "countries": COUNTRIES
+            "countries": COUNTRIES,
+            "currencies": CURRENCIES
         }
     )
-
 
 @router.post("/create" , response_class=HTMLResponse, name="tour_package_create")
 def create_package(
@@ -135,6 +140,7 @@ def create_package(
     description: str = Form(...),
     country: str = Form(...),
     city: str = Form(...),
+    currency: str = Form(...),
     price: float = Form(...),
     itinerary: str = Form(None),
     excludes: str = Form(None),
@@ -150,6 +156,7 @@ def create_package(
         "description": description,
         "country": country,
         "city": city,
+        "currency": currency,
         "price": price,
         "itinerary": itinerary,
         "excludes": excludes,
@@ -233,12 +240,15 @@ def edit_page(
         d.driver_id for d in package.drivers
     ]
 
+
+
     return templates.TemplateResponse(
         "tour_packages/form.html",
         {
             "request": request,
             "package": package,
             "drivers": drivers,
+            "currencies": CURRENCIES,
             "assigned_driver_ids": assigned_driver_ids,
             "countries": COUNTRIES
         }
@@ -254,6 +264,7 @@ def update_package(
     description: str = Form(...),
     country: str = Form(...),
     city: str = Form(...),
+    currency: str = Form(...),
     price: float = Form(...),
     itinerary: Optional[str] = Form(None),
     excludes: Optional[str] = Form(None),
@@ -282,6 +293,7 @@ def update_package(
         description=description,
         country=country,
         city=city,
+        currency=currency,
         price=price,
         itinerary=itinerary,
         excludes=excludes,
@@ -378,8 +390,19 @@ def save_image(file: UploadFile) -> str:
     return path.replace("app/static/", "")
 
 @router.get("/tours", name="public_tour_list")
-def public_tour_list(request: Request, db: Session = Depends(get_db), search: str = ""):
-    query = db.query(TourPackage).filter(TourPackage.is_deleted == False, TourPackage.status == "active")
+def public_tour_list(
+    request: Request,
+    db: Session = Depends(get_db),
+    search: str = "",
+    travel_date: str | None = None
+):
+    query = (
+        db.query(TourPackage)
+        .filter(
+            TourPackage.is_deleted == False,
+            TourPackage.status == "active"
+        )
+    )
 
     if search:
         query = query.filter(
@@ -388,11 +411,27 @@ def public_tour_list(request: Request, db: Session = Depends(get_db), search: st
             TourPackage.country.ilike(f"%{search}%")
         )
 
+    if travel_date:
+        booked_subquery = (
+            db.query(ManualBooking.tour_package_id)
+            .filter(ManualBooking.travel_date == travel_date)
+            .subquery()
+        )
+
+        query = query.filter(
+            TourPackage.id.notin_(booked_subquery)
+        )
+
     tours = query.order_by(TourPackage.id.desc()).all()
 
     return templates.TemplateResponse(
         "tour_packages/public_list.html",
-        {"request": request, "tours": tours, "search": search}
+        {
+            "request": request,
+            "tours": tours,
+            "search": search,
+            "travel_date": travel_date,
+        }
     )
     
 @router.post("/gallery-image/{image_id}/delete", name="delete_gallery_image")
