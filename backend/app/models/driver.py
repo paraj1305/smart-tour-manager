@@ -13,6 +13,7 @@ class Driver(Base):
         index=True
     )
     name = Column(String, nullable=False)
+    country_code = Column(String(10), nullable=False, server_default='+91')
     phone_number = Column(String, nullable=False)
     vehicle_type = Column(String, nullable=True)   
     vehicle_number = Column(String, nullable=True)

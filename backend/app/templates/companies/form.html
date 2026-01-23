@@ -104,15 +104,41 @@
                                 </div>
 
                                 <!-- Phone -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Phone</label>
-                                    <input type="text" name="phone"
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Phone</label>
+
+                                <div class="input-group">
+                                    <!-- Country Code -->
+                                    <select name="country_code"
+                                            id="country_code"
+                                            class="form-select"
+                                            style="max-width: 110px;">
+                                        {% for code, name in country_codes %}
+                                        <option value="{{ code }}"
+                                            {% if form.country_code == code
+                                                or (company and company.country_code == code) %}
+                                                selected
+                                            {% endif %}>
+                                            {{ code }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <!-- Phone Number -->
+                                    <input type="text"
+                                        name="phone"
                                         class="form-control {% if errors.phone %}is-invalid{% endif %}"
-                                        value="{{ form.phone | default(company.phone if company else '') }}">
-                                    <span class="invalid-feedback">
-                                        {{ errors.phone | default('') }}
-                                    </span>
+                                        value="{{ form.phone | default(company.phone if company else '') }}"
+                                        placeholder="Phone number">
                                 </div>
+
+                                {% if errors.phone %}
+                                <span class="invalid-feedback d-block">
+                                    {{ errors.phone }}
+                                </span>
+                                {% endif %}
+                            </div>
+
                             </div>
 
                             {% if company and not is_my_profile %}

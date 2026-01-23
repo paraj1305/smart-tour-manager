@@ -11,6 +11,7 @@ class Company(Base):
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
     company_name = Column(String(150), nullable=False)
     logo = Column(String(255), nullable=True)  
+    country_code = Column(String(10), nullable=False, server_default='+91')
     phone = Column(String(20))
     status = Column(String(20), default="active")
     currency = Column(String(10), default="USD")

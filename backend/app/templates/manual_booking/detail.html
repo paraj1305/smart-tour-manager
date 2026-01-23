@@ -68,14 +68,15 @@
           <small class="text-muted d-block">📞 {{ booking.phone }}</small>
           <small class="text-muted d-block">✉ {{ booking.email or '-' }}</small>
           <small class="text-muted d-block">📍 {{ booking.pickup_location or '-' }}</small>
+          <small class="text-muted d-block">👥 {{ booking.adults }} Adults, {{ booking.kids }} Kids</small>
         </div>
 
         <!-- Payment Info -->
         <div class="card shadow-sm rounded-3 p-3">
           <h6 class="text-muted mb-2">Payment Info</h6>
-          <div class="fw-bold fs-5">₹{{ booking.total_amount }}</div>
-          <small class="text-success d-block">Paid: ₹{{ booking.advance_amount }}</small>
-          <small class="text-danger d-block">Remaining: ₹{{ booking.remaining_amount }}</small>
+          <div class="fw-bold fs-5">{{ booking.tour_package.currency }} {{ booking.total_amount }}</div>
+          <small class="text-success d-block">Paid: {{ booking.tour_package.currency }} {{ booking.advance_amount }}</small>
+          <small class="text-danger d-block">Remaining: {{ booking.tour_package.currency }} {{ booking.remaining_amount }}</small>
         </div>
 
         <!-- Travel Info -->

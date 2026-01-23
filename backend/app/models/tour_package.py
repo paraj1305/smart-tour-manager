@@ -15,6 +15,7 @@ class TourPackage(Base):
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=False)
     country = Column(String(100), nullable=False)
+    currency = Column(String(10), nullable=False, server_default="AED")
     city = Column(String(100), nullable=False)
     price = Column(Float, nullable=False)
     itinerary = Column(Text, nullable=True)

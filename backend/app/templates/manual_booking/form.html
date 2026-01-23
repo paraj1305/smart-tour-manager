@@ -27,23 +27,57 @@
 <h5 class="mb-3 fw-semibold">Guest Details</h5>
 
 <div class="row">
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
         <label class="form-label fw-semibold">Guest Name</label>
         <input type="text" name="guest_name" class="form-control"
                value="{{ booking.guest_name if booking else '' }}">
     </div>
 
-    <div class="col-md-4 mb-3">
-        <label class="form-label fw-semibold">Phone Number</label>
-        <input type="text" name="phone" class="form-control"
-               value="{{ booking.phone if booking else '' }}">
-    </div>
+<div class="col-md-4 mb-3">
+    <label class="form-label fw-semibold">Phone Number</label>
 
-    <div class="col-md-4 mb-3">
+    <div class="input-group">
+        <select name="country_code"
+                id="country_code"
+                class="form-select"
+                style="max-width:110px;">
+            {% for code,name in country_codes %}
+            <option value="{{ code }}"
+                {% if booking and booking.country_code == code %}
+                    selected
+                {% endif %}>
+                {{ code }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <input type="text"
+               name="phone"
+               class="form-control"
+               value="{{ booking.phone if booking else '' }}"
+               placeholder="Phone number">
+    </div>
+</div>
+
+
+    <div class="col-md-3 mb-3">
         <label class="form-label fw-semibold">Email</label>
         <input type="email" name="email" class="form-control"
                value="{{ booking.email if booking else '' }}">
     </div>
+
+    <div class="col-md-2 mb-3">
+        <label class="form-label fw-semibold">Adults</label>
+        <input type="number" name="adults" class="form-control"
+               value="{{ booking.adults if booking else 1 }}">
+    </div>
+    <div class="col-md-2 mb-3">
+        <label class="form-label fw-semibold">Kids</label>
+        <input type="number" name="kids" class="form-control"
+                      value="{{ booking.kids if booking else 0 }}">
+    </div>
+
+
 </div>
 
 <!-- ================= TOUR DETAILS ================= -->
@@ -62,7 +96,7 @@
             <option value="{{ package.id }}"
                 {% if booking and booking.tour_package_id == package.id %}selected{% endif %}
                 {% if selected_package and package.id == selected_package.id %}selected{% endif %}>
-                {{ package.title }} - {{ company.currency }} {{ package.price }}
+                {{ package.title }} - {{ package.currency }} {{ package.price }}
             </option>
             {% endfor %}
         </select>
@@ -106,7 +140,8 @@
         {% for driver in drivers %}
         <option value="{{ driver.id }}"
         {% if booking and booking.driver_id == driver.id %}selected{% endif %}>
-        {{ driver.name }} - {{ driver.phone_number }}
+        {{ driver.name }} —
+        {{ driver.vehicle_type }} {{driver.seats}} seats ({{ driver.vehicle_number }})
     </option>
     {% endfor %}
 </select>
@@ -163,24 +198,33 @@
 <script>
 $(document).ready(function () {
         /* Validation */
-    $("#manual-booking-form").validate({
-        rules: {
-            guest_name: { required: true },
-            phone: { required: true, minlength: 7, maxlength: 15 },
-            email: { email: true },
-            pickup_location: { required: true },
-            tour_package_id: { required: true },
-            travel_date: { required: true },
-            total_amount: { required: true, number: true },
-            advance_amount: { number: true }
-        },
-        errorElement: "span",
-        errorClass: "invalid-feedback",
-        highlight: e => $(e).addClass("is-invalid"),
-        unhighlight: e => $(e).removeClass("is-invalid"),
-        errorPlacement: (error, element) => error.insertAfter(element)
-    });
-
+$("#manual-booking-form").validate({
+    rules: {
+        guest_name: { required: true },
+        country_code: { required: true },
+        phone: { required: true, minlength: 7, maxlength: 15 },
+        email: { email: true },  // optional, only check format
+        adults: { required: true, min: 1 },
+        kids: { required: true, min: 0 },
+        pickup_location: { required: true },
+        tour_package_id: { required: true },
+        travel_date: { required: true },
+        total_amount: { required: true, number: true },
+        advance_amount: { number: true }
+    },
+    errorElement: "span",
+    errorClass: "invalid-feedback",
+    highlight: e => $(e).addClass("is-invalid"),
+    unhighlight: e => $(e).removeClass("is-invalid"),
+    errorPlacement: function (error, element) {
+        // Fix for input groups (country code + phone, adults + kids)
+        if (element.parent().hasClass('input-group')) {
+            error.insertAfter(element.parent());
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
     $('.select2').select2({ width: '100%', allowClear: true });
 
     const packageSelect = $('[name="tour_package_id"]');
@@ -209,6 +253,16 @@ $(document).ready(function () {
     if (PREFILLED_TRAVEL_DATE) {
         travelDatePicker.setDate(PREFILLED_TRAVEL_DATE, true);
     }
+
+    setTimeout(() => {
+        const packageId = $('[name="tour_package_id"]').val();
+        const travelDate = $('[name="travel_date"]').val();
+
+        if (packageId && travelDate) {
+            applyBookedDates(packageId);
+            loadAvailableDrivers();
+        }
+    }, 300);
 
     function applyBookedDates(packageId) {
         fetch(`/manual-bookings/booked-dates/${packageId}`)
@@ -306,7 +360,7 @@ $(document).ready(function () {
     );
 
         $(document).ready(function () {
-            calculateRemaining(); // 🔥 auto-fill on edit
+            calculateRemaining(); 
         });
 });
 </script>

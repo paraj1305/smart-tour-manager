@@ -4,6 +4,7 @@ from typing import Optional
 class CompanyCreate(BaseModel):
     company_name: str = Field(..., min_length=2, max_length=150)
     email: EmailStr
+    country_code: str
     phone: Optional[str] = Field(
         min_length=7,
         max_length=15,
@@ -14,6 +15,7 @@ class CompanyCreate(BaseModel):
 
 class CompanyUpdate(BaseModel):
     company_name: str = Field(..., min_length=2, max_length=150)
+    country_code: str
     phone: Optional[str] = Field(
         min_length=7,
         max_length=15,

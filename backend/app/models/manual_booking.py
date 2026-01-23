@@ -18,8 +18,11 @@ class ManualBooking(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     guest_name = Column(String(150), nullable=False)
+    country_code = Column(String(10), nullable=False, server_default='+91')
     phone = Column(String(20), nullable=False)
     email = Column(String(150), nullable=True)
+    adults = Column(Integer, nullable=False, default=1)
+    kids = Column(Integer, nullable=False, default=0)
     tour_package_id = Column(
         Integer,
         ForeignKey("tour_packages.id"),

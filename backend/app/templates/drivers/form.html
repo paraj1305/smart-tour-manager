@@ -68,10 +68,23 @@
                         <!-- Phone -->
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-semibold">Phone Number</label>
-                            <input type="text"
-                                   name="phone_number"
-                                   class="form-control {% if errors.phone_number %}is-invalid{% endif %}"
-                                   value="{{ form.phone_number | default(driver.phone_number if driver else '') }}">
+                            <div class="input-group">   
+                                <select name="country_code"
+                                        id="country_code"
+                                        class="form-select"
+                                        style="max-width: 110px;">
+                                    {% for code,name in country_codes %}
+                                    <option value="{{ code }}"
+                                        {% if driver and driver.country_code == code %}selected{% endif %}>
+                                        {{ code }}
+                                    </option>
+                                    {% endfor %}
+                                </select>   
+                                <input type="text"
+                                       name="phone_number"
+                                       class="form-control {% if errors.phone_number %}is-invalid{% endif %}"
+                                       value="{{ form.phone_number | default(driver.phone_number if driver else '') }}">
+                            </div>
                             <span class="invalid-feedback">
                                 {{ errors.phone_number | default('') }}
                             </span>

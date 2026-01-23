@@ -13,8 +13,9 @@ from app.utils.flash import flash_redirect
 from typing import Optional, List
 from sqlalchemy import func,and_,or_
 from datetime import date
-
-
+from twilio.rest import Client
+from app.core.constants import COUNTRY_CODES
+from app.services.whatsapp_service import send_whatsapp_booking_confirmation, format_phone
 
 router = APIRouter(prefix="/manual-bookings", tags=["Manual Booking"])
 
@@ -75,6 +76,7 @@ def manual_booking_create_page(
             "request": request,
             "packages": packages,
             "company": company,
+            "country_codes": COUNTRY_CODES,
             "selected_package": selected_package,
             "travel_date": travel_date,
             "is_edit": False,
@@ -85,8 +87,11 @@ def manual_booking_create_page(
 def create_manual_booking(
     request: Request,
     guest_name: str = Form(...),
+    country_code: str = Form(...),
     phone: str = Form(...),
     email: str = Form(None),
+    adults: int = Form(...),
+    kids: int = Form(...),
     pickup_location: str = Form(None),
     tour_package_id: int = Form(...),
     driver_id: int = Form(None),
@@ -127,8 +132,11 @@ def create_manual_booking(
 
     booking = ManualBooking(
         guest_name=guest_name,
+        country_code=country_code,
         phone=phone,
         email=email,
+        adults=adults,
+        kids=kids,
         pickup_location=pickup_location,
         tour_package_id=tour_package_id,
         driver_id=driver_id,
@@ -142,6 +150,14 @@ def create_manual_booking(
 
     db.add(booking)
     db.commit()
+    db.refresh(booking)
+
+    try:
+        phone_number = format_phone(country_code, phone)
+        send_whatsapp_booking_confirmation(phone_number, booking)
+
+    except Exception as e:
+       print("WhatsApp send failed for booking %s", booking.id)
 
     return flash_redirect(
         url=request.url_for("manual_booking_list"),
@@ -159,7 +175,12 @@ def manual_booking_datatable(
 ):
     bookings = (
         db.query(ManualBooking)
-        .filter(ManualBooking.is_deleted == False)
+        .filter(
+            ManualBooking.is_deleted == False,
+            ManualBooking.tour_package.has(
+                TourPackage.company_id == current_user.id
+            )
+        )
         .order_by(ManualBooking.id.desc())
         .all()
     )
@@ -175,8 +196,9 @@ def manual_booking_datatable(
             "id": booking.id,
            "guest_details": f"""
                 <strong>{booking.guest_name}</strong><br>
-                📞 {booking.phone}<br>
-                ✉️ {booking.email or "-"}
+                📞 {booking.country_code}{booking.phone}<br>
+                ✉️ {booking.email or "-"}<br>
+                👨‍👩‍👧‍👦 {booking.adults} - {booking.kids}
             """,
 
             "travel_details": f"""
@@ -187,9 +209,9 @@ def manual_booking_datatable(
             """,
 
             "payment_details": f"""
-                <strong>{company.currency} {booking.total_amount}</strong><br>
-                Advance: {company.currency} {booking.advance_amount}<br>
-                Remaining: {company.currency} {booking.remaining_amount}<br>
+                <strong>{booking.tour_package.currency} {booking.total_amount}</strong><br>
+                Advance: {booking.tour_package.currency} {booking.advance_amount}<br>
+                Remaining: {booking.tour_package.currency} {booking.remaining_amount}<br>
             """,
             
             "status": "Paid" if booking.remaining_amount == 0 else "Pending",
@@ -272,6 +294,7 @@ def edit_manual_booking(
             "request": request,
             "booking": booking,
             "packages": packages,
+            "country_codes": COUNTRY_CODES,
             "drivers": drivers,   
             "company": company,
         }
@@ -282,8 +305,11 @@ def update_manual_booking(
     request: Request,
     booking_id: int,
     guest_name: str = Form(...),
+    adults: int = Form(...),
+    kids: int = Form(...),
     tour_package_id: int = Form(...),
     driver_id: int = Form(None),
+    country_code: str = Form(...),
     phone: str = Form(...),
     email: str = Form(None),
     pickup_location: str = Form(None),
@@ -322,8 +348,11 @@ def update_manual_booking(
 
     # ✅ UPDATE BOOKING
     booking.guest_name = guest_name
+    booking.country_code = country_code
     booking.phone = phone
     booking.email = email
+    booking.adults = adults
+    booking.kids = kids
     booking.tour_package_id = tour_package_id
     booking.driver_id = driver_id
     booking.pickup_location = pickup_location
@@ -513,6 +542,7 @@ def get_available_drivers(
         {
             "id": d.id,
             "name": d.name,
+            "country_code": d.country_code,
             "phone": d.phone_number,
             "vehicle_type": d.vehicle_type,
             "vehicle_number": d.vehicle_number,
@@ -564,6 +594,7 @@ def get_all_package_drivers(
         {
             "id": d.id,
             "name": d.name,
+            "country_code": d.country_code,
             "phone": d.phone_number,
             "vehicle_type": d.vehicle_type,
             "vehicle_number": d.vehicle_number,

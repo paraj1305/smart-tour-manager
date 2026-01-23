@@ -6,6 +6,7 @@ class TourPackageCreate(BaseModel):
     description: str
     country: str
     city: str
+    currency: str
     price: float = Field(..., gt=0)
     itinerary: Optional[str] = None
     excludes: Optional[str] = None
@@ -15,6 +16,7 @@ class TourPackageUpdate(BaseModel):
     description: str
     country: str
     city: str
+    currency: str
     price: float
     itinerary: Optional[str]
     excludes: Optional[str]

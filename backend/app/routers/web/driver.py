@@ -5,7 +5,7 @@ from fastapi import (
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
 from pydantic import ValidationError
-
+from app.core.constants import COUNTRY_CODES
 from app.database.session import get_db
 from app.core.templates import templates
 from app.auth.dependencies import company_only
@@ -13,6 +13,7 @@ from app.models.driver import Driver
 from app.schemas.driver import DriverCreate, DriverUpdate
 from app.utils.flash import flash_redirect
 from app.models.user import User
+
 
 # -------------------------------------------------
 # Router config
@@ -31,13 +32,15 @@ def render_form(
     driver=None,
     form=None,
     errors=None,
-    status_code=200
+    status_code=200,
+    country_codes=None
 ):
     return templates.TemplateResponse(
         "drivers/form.html",
         {
             "request": request,
             "driver": driver,
+            "country_codes": COUNTRY_CODES,
             "form": form or {},
             "errors": errors or {},
         },
@@ -77,7 +80,7 @@ def driver_datatable(
             "name": d.name,
             "vehicle": f"{d.vehicle_type} ({d.vehicle_number})",
             "seats": d.seats,
-            "phone": d.phone_number,
+            "phone": f"{d.country_code}{d.phone_number}",
             "actions": f"""
                 <a href="{request.url_for('driver_edit_page', driver_id=d.id)}"
                    class="btn btn-sm btn-edit">
@@ -102,12 +105,13 @@ def create_page(
     request: Request,
     _=Depends(company_only)
 ):
-    return render_form(request)
+    return render_form(request, country_codes=COUNTRY_CODES)
 
 @router.post("/create", name="driver_create")
 async def driver_create(
     request: Request,
     name: str = Form(...),
+    country_code: str = Form(...),
     phone_number: str = Form(...),
     vehicle_type: str = Form(...),
     vehicle_number: str = Form(...),
@@ -122,6 +126,7 @@ async def driver_create(
     driver = Driver(
         company_id=current_user.company.id,
         name=name,
+        country_code=country_code,
         phone_number=phone_number,
         vehicle_type=vehicle_type,
         vehicle_number=vehicle_number,
@@ -165,6 +170,7 @@ def edit_page(
     return render_form(
         request,
         driver=driver,
+        country_codes=COUNTRY_CODES,
         form=driver.__dict__
     )
 
@@ -176,6 +182,7 @@ def update_driver(
     vehicle_type: str = Form(...),
     vehicle_number: str = Form(...),
     seats: int = Form(...),
+    country_code: str = Form(...),
     phone_number: str = Form(...),
     image: UploadFile = File(None),
 
@@ -190,6 +197,7 @@ def update_driver(
     driver.vehicle_type = vehicle_type
     driver.vehicle_number = vehicle_number
     driver.seats = seats
+    driver.country_code = country_code
     driver.phone_number = phone_number
 
     if image and image.filename:
