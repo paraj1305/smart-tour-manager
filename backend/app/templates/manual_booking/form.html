@@ -180,34 +180,33 @@
 <script>
     $(document).ready(function () {
         /* Validation */
-        $("#manual-booking-form").validate({
-            rules: {
-                guest_name: { required: true },
-                country_code: { required: true },
-                phone: { required: true, minlength: 7, maxlength: 15 },
-                email: { email: true },  // optional, only check format
-                adults: { required: true, min: 1 },
-                kids: { required: true, min: 0 },
-                pickup_location: { required: true },
-                tour_package_id: { required: true },
-                travel_date: { required: true },
-                total_amount: { required: true, number: true },
-                advance_amount: { number: true }
-            },
-            errorElement: "span",
-            errorClass: "invalid-feedback",
-            highlight: e => $(e).addClass("is-invalid"),
-            unhighlight: e => $(e).removeClass("is-invalid"),
-            errorPlacement: function (error, element) {
-                // Fix for input groups (country code + phone, adults + kids)
-                if (element.parent().hasClass('input-group')) {
-                    error.insertAfter(element.parent());
-                } else {
-                    error.insertAfter(element);
-                }
-            }
-        });
-        $('.select2').select2({ width: '100%', allowClear: true });
+$("#manual-booking-form").validate({
+    rules: {
+        guest_name: { required: true },
+        country_code: { required: true },
+        phone: { required: true, minlength: 7, maxlength: 15 },
+        email: { email: true },  // optional, only check format
+        adults: { required: true, min: 1 },
+        kids: { required: true, min: 0 },
+        pickup_location: { required: true },
+        tour_package_id: { required: true },
+        travel_date: { required: true },
+        total_amount: { required: true, number: true },
+        advance_amount: { number: true }
+    },
+    errorElement: "span",
+    errorClass: "invalid-feedback",
+    highlight: e => $(e).addClass("is-invalid"),
+    unhighlight: e => $(e).removeClass("is-invalid"),
+    errorPlacement: function (error, element) {
+        if (element.parent().hasClass('input-group')) {
+            error.insertAfter(element.parent());
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+    $('.select2').select2({ width: '100%', allowClear: true });
 
         const packageSelect = $('[name="tour_package_id"]');
 
