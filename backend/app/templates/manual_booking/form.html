@@ -19,8 +19,48 @@
                 {{ request.url_for('manual_booking_create') }}
               {% endif %}" class="shadow-sm p-4 rounded bg-white border" novalidate>
 
+
+              
+                    <!-- ================= TOUR DETAILS ================= -->
+                    <h5 class="mt-4 mb-3 fw-semibold manual-booking-title">Tour Details</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Tour Package</label>
+
+                            <select name="tour_package_id" class="form-select select2" {% if selected_package
+                                %}disabled{% endif %} data-placeholder="Search tour package">
+                                <option value=""></option>
+                                {% for package in packages %}
+                                <option value="{{ package.id }}" {% if booking and booking.tour_package_id==package.id
+                                    %}selected{% endif %} {% if selected_package and package.id==selected_package.id
+                                    %}selected{% endif %}>
+                                    {{ package.title }} - {{ package.currency }} {{ package.price }}
+                                </option>
+                                {% endfor %}
+                            </select>
+
+                            {% if selected_package %}
+                            <input type="hidden" name="tour_package_id" value="{{ selected_package.id }}">
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold">Travel Date</label>
+                            <input type="date" name="travel_date" class="form-control"
+                                value="{{ booking.travel_date if booking else '' }}">
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold">Travel Time</label>
+                            <input type="time" name="travel_time" class="form-control time-picker"
+                                value="{{ booking.travel_time if booking else '' }}">
+                        </div>
+                    </div>
+                    
+
                     <!-- ================= GUEST DETAILS ================= -->
-                    <h5 class="mb-3 fw-semibold manual-booking-title">Guest Details</h5>
+                    <h5 class="my-3 fw-semibold manual-booking-title">Guest Details</h5>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -73,43 +113,6 @@
                             </div>
                         </div>
 
-                    </div>
-
-                    <!-- ================= TOUR DETAILS ================= -->
-                    <h5 class="mt-4 mb-3 fw-semibold manual-booking-title">Tour Details</h5>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Tour Package</label>
-
-                            <select name="tour_package_id" class="form-select select2" {% if selected_package
-                                %}disabled{% endif %} data-placeholder="Search tour package">
-                                <option value=""></option>
-                                {% for package in packages %}
-                                <option value="{{ package.id }}" {% if booking and booking.tour_package_id==package.id
-                                    %}selected{% endif %} {% if selected_package and package.id==selected_package.id
-                                    %}selected{% endif %}>
-                                    {{ package.title }} - {{ package.currency }} {{ package.price }}
-                                </option>
-                                {% endfor %}
-                            </select>
-
-                            {% if selected_package %}
-                            <input type="hidden" name="tour_package_id" value="{{ selected_package.id }}">
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label fw-semibold">Travel Date</label>
-                            <input type="date" name="travel_date" class="form-control"
-                                value="{{ booking.travel_date if booking else '' }}">
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label fw-semibold">Travel Time</label>
-                            <input type="time" name="travel_time" class="form-control time-picker"
-                                value="{{ booking.travel_time if booking else '' }}">
-                        </div>
                     </div>
 
                     <div class="row">
