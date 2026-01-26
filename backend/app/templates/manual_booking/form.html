@@ -25,23 +25,23 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Select Customer</label>
-                        <select id="customer_select" class="form-select" style="width:100%"></select>
+                            <select id="customer_select" class="form-select" style="width:100%"></select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6  mb-3">
                             <label class="form-label fw-semibold">Guest Name</label>
                             <input type="text" name="guest_name" class="form-control"
                                 value="{{ booking.customer.guest_name if booking else '' }}">
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 col-lg-4 mb-3">
                             <label class="form-label fw-semibold">Phone Number</label>
 
                             <div class="input-group">
                                 <select name="country_code" id="country_code" class="form-select"
                                     style="max-width:110px;">
                                     {% for code,name in country_codes %}
-                                    <option value="{{ code }}" {% if booking and booking.customer.country_code==code %} selected
-                                        {% endif %}>
+                                    <option value="{{ code }}" {% if booking and booking.customer.country_code==code %}
+                                        selected {% endif %}>
                                         {{ code }}
                                     </option>
                                     {% endfor %}
@@ -53,13 +53,13 @@
                         </div>
 
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 col-lg-4 mb-3">
                             <label class="form-label fw-semibold">Email</label>
                             <input type="email" name="email" class="form-control"
                                 value="{{ booking.customer.email if booking else '' }}">
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-12 col-lg-4 mb-3">
                             <label class="form-label fw-semibold">Passengers</label>
 
                             <div class="input-group">
@@ -107,7 +107,7 @@
 
                         <div class="col-md-3 mb-3">
                             <label class="form-label fw-semibold">Travel Time</label>
-                            <input type="time" name="travel_time" class="form-control"
+                            <input type="time" name="travel_time" class="form-control time-picker"
                                 value="{{ booking.travel_time if booking else '' }}">
                         </div>
                     </div>
@@ -187,76 +187,76 @@
 <script>
     $(document).ready(function () {
         /* Validation */
-$("#manual-booking-form").validate({
-    rules: {
-        guest_name: { required: true },
-        country_code: { required: true },
-        phone: { required: true, minlength: 7, maxlength: 15 },
-        email: { email: true },  // optional, only check format
-        adults: { required: true, min: 1 },
-        kids: { required: true, min: 0 },
-        pickup_location: { required: true },
-        tour_package_id: { required: true },
-        travel_date: { required: true },
-        total_amount: { required: true, number: true },
-        advance_amount: { number: true }
-    },
-    errorElement: "span",
-    errorClass: "invalid-feedback",
-    highlight: e => $(e).addClass("is-invalid"),
-    unhighlight: e => $(e).removeClass("is-invalid"),
-    errorPlacement: function (error, element) {
-        if (element.parent().hasClass('input-group')) {
-            error.insertAfter(element.parent());
-        } else {
-            error.insertAfter(element);
-        }
-    }
-});
+        $("#manual-booking-form").validate({
+            rules: {
+                guest_name: { required: true },
+                country_code: { required: true },
+                phone: { required: true, minlength: 7, maxlength: 15 },
+                email: { email: true },  // optional, only check format
+                adults: { required: true, min: 1 },
+                kids: { required: true, min: 0 },
+                pickup_location: { required: true },
+                tour_package_id: { required: true },
+                travel_date: { required: true },
+                total_amount: { required: true, number: true },
+                advance_amount: { number: true }
+            },
+            errorElement: "span",
+            errorClass: "invalid-feedback",
+            highlight: e => $(e).addClass("is-invalid"),
+            unhighlight: e => $(e).removeClass("is-invalid"),
+            errorPlacement: function (error, element) {
+                if (element.parent().hasClass('input-group')) {
+                    error.insertAfter(element.parent());
+                } else {
+                    error.insertAfter(element);
+                }
+            }
+        });
 
-$('.select2').select2({
-    width: '100%',
-    allowClear: true
-});
+        $('.select2').select2({
+            width: '100%',
+            allowClear: true
+        });
 
-// customer ajax select2 (MUST be separate)
-$('#customer_select').select2({
-    width: '100%',
-    placeholder: "Search customer by name / phone",
-    allowClear: true,
-    minimumInputLength: 1,
-    ajax: {
-        url: "{{ url_for('customer_search') }}",
-        dataType: 'json',
-        delay: 300,
-        data: function (params) {
-            return { q: params.term };
-        },
-        processResults: function (data) {
-            return {
-                results: data.results
-            };
-        }
-    }
-});
+        // customer ajax select2 (MUST be separate)
+        $('#customer_select').select2({
+            width: '100%',
+            placeholder: "Search customer by name / phone",
+            allowClear: true,
+            minimumInputLength: 1,
+            ajax: {
+                url: "{{ url_for('customer_search') }}",
+                dataType: 'json',
+                delay: 300,
+                data: function (params) {
+                    return { q: params.term };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                }
+            }
+        });
 
 
-    // Autofill on select
-    $('#customer_select').on('select2:select', function (e) {
-        const data = e.params.data;
+        // Autofill on select
+        $('#customer_select').on('select2:select', function (e) {
+            const data = e.params.data;
 
-        $('[name="guest_name"]').val(data.guest_name);
-        $('[name="email"]').val(data.email || '');
-        $('[name="phone"]').val(data.phone);
-        $('[name="country_code"]').val(data.country_code).trigger('change');
-    });
+            $('[name="guest_name"]').val(data.guest_name);
+            $('[name="email"]').val(data.email || '');
+            $('[name="phone"]').val(data.phone);
+            $('[name="country_code"]').val(data.country_code).trigger('change');
+        });
 
-    // Clear fields if customer removed
-    $('#customer_select').on('select2:clear', function () {
-        $('[name="guest_name"]').val('');
-        $('[name="email"]').val('');
-        $('[name="phone"]').val('');
-    });
+        // Clear fields if customer removed
+        $('#customer_select').on('select2:clear', function () {
+            $('[name="guest_name"]').val('');
+            $('[name="email"]').val('');
+            $('[name="phone"]').val('');
+        });
 
         const packageSelect = $('[name="tour_package_id"]');
 

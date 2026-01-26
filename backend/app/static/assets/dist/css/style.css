@@ -2205,6 +2205,264 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
     font-weight: 600;
 }
 
+#manualBookingTable i {
+    color: #212529 !important;
+    margin-right: 5px;
+    font-weight: 900;
+}
+
+#manualBookingTable tbody td {
+    line-height: 1.5;
+}
+
+.flatpickr-input {
+    background: url("../../../assets/icon/calendar_icon.svg") no-repeat;
+    background-position: calc(100% - 10px) center;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.time-picker[type=time].form-control {
+    cursor: pointer;
+}
+
+.time-picker[type="time"]::-webkit-calendar-picker-indicator {
+    transform: scale(1.4);
+    cursor: pointer;
+}
+
+.availability-calender-page .card {
+    border-radius: 6px;
+    margin: 0px;
+}
+
+/* vailability calender css */
+.custom-flatpickr {
+    width: 100%;
+    max-width: 330px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+#calendar {
+    width: 100%;
+    height: 90vh;
+    background: #ffffff;
+    padding: 0px;
+    border-radius: 8px;
+}
+
+.fc .fc-header-toolbar {
+    margin-bottom: 0px !important;
+    gap: 15px;
+}
+
+.fc-toolbar {
+    background: linear-gradient(175deg, #159957, #155799);
+    padding: 14px 18px !important;
+    border-radius: 8px 8px 0 0;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.fc .fc-col-header-cell-cushion {
+    padding: 10px 4px;
+}
+
+.fc-button {
+    background: #ffffff !important;
+    color: #155799 !important;
+    border: none !important;
+    font-weight: 600;
+    border-radius: 6px !important;
+    padding: 6px 12px;
+}
+
+.fc-button:hover {
+    background: #f0f0f0 !important;
+}
+
+.fc-button-active {
+    color: #159957 !important;
+}
+
+.fc-daygrid-day {
+    background: #f8fbff;
+    cursor: pointer;
+}
+
+.fc-daygrid-day:hover {
+    background: #e9f5ff;
+}
+
+.fc .fc-daygrid-day-frame {
+    padding: 5px;
+}
+
+.fc .fc-daygrid-day-number {
+    padding: 0;
+}
+
+.fc .fc-booking-event {
+    padding: 0px;
+}
+
+.fc .fc-daygrid-day-top {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    align-items: center;
+}
+
+.fc .fc-daygrid-day-events {
+    margin-top: 5px;
+}
+
+.fc-direction-ltr .fc-daygrid-event.fc-event-end,
+.fc-direction-rtl .fc-daygrid-event.fc-event-start {
+    margin: 0px;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.fc-col-header-cell {
+    background: #f1f8ff;
+    font-weight: 600;
+    color: #155799;
+}
+
+
+.fc-daygrid-day-number {
+    font-weight: 600;
+    color: #155799;
+}
+
+
+.fc-day-today {
+    background: rgba(21, 153, 87, 0.15) !important;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+    color: #159957;
+}
+
+.fc-event {
+    /* background: linear-gradient(175deg, #159957, #155799) !important; */
+    background: #15717e;
+    border: none !important;
+    border-radius: 6px;
+    padding: 2px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff !important;
+}
+
+
+.fc-booking-event {
+    white-space: normal;
+    padding: 4px;
+    line-height: 1.3;
+}
+
+.fc-guest-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.fc-pickup {
+    font-size: 12px;
+    color: #fff;
+    margin-bottom: 3px;
+}
+
+.fc i {
+    color: #fff !important;
+    margin-right: 3px;
+}
+
+.fc-pickup:last-child {
+    margin-bottom: 3px;
+}
+
+
+
+.fc-disabled-day {
+    background: #f1f1f1 !important;
+    opacity: 0.6;
+}
+
+
+.fc-booked-day {
+    background: #ffeaea !important;
+
+    opacity: 0.85;
+}
+
+
+.fc-disabled-day .fc-daygrid-day-frame,
+.fc-booked-day .fc-daygrid-day-frame {
+    pointer-events: none;
+}
+
+
+.fc-booked-day .fc-event {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+
+.fc-booked-day .fc-daygrid-day-number {
+    color: #dc3545;
+    font-weight: 700;
+}
+
+
+.fc-booked-day::after {
+
+    font-size: 10px;
+    color: #dc3545;
+    display: block;
+    text-align: center;
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+
+.fc .fc-day-sun .fc-col-header-cell-cushion,
+.fc .fc-day-sat .fc-col-header-cell-cushion {
+    color: #dc3545;
+}
+
+.fc .fc-day-mon .fc-col-header-cell-cushion,
+.fc .fc-day-tue .fc-col-header-cell-cushion,
+.fc .fc-day-wed .fc-col-header-cell-cushion,
+.fc .fc-day-thu .fc-col-header-cell-cushion,
+.fc .fc-day-fri .fc-col-header-cell-cushion {
+    color: #198754;
+}
+
+.tour-pack-detail-page i {
+    min-width: 16px;
+    display: inline-flex;
+    justify-content: center;
+}
+
+.tour-pack-detail-page .flex-column small {
+    font-size: 14px;
+}
+
+.tour-pack-detail-page h6.text-muted {
+    font-size: 18px;
+}
+
+
+
 @media (max-width: 1499.55px) {
     .admin-order-history-page .order-history-select-fild {
         flex-wrap: wrap;
@@ -3382,6 +3640,58 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
         font-size: 18px;
         padding: 0 12px;
     }
+
+    .time-picker[type="time"]::-webkit-calendar-picker-indicator {
+        transform: scale(1.5);
+    }
+
+    .fc-booking-event .fc-pickup {
+        display: none !important;
+    }
+
+    .fc-direction-ltr .fc-daygrid-event.fc-event-end,
+    .fc-direction-rtl .fc-daygrid-event.fc-event-start {
+        padding: 3px;
+        border-radius: 2px;
+    }
+
+    .fc-guest-name {
+        font-size: 12px;
+        white-space: normal;
+        margin-bottom: 0px;
+        word-break: break-all;
+    }
+
+    .fc-toolbar {
+        padding: 10px 10px !important;
+        border-radius: 4px 4px 0 0;
+        flex-direction: row;
+    }
+
+    .fc .fc-button-primary {
+        padding: 3px;
+    }
+
+    .fc .fc-daygrid-day-number {
+        font-size: 14px;
+    }
+
+    .tour-pack-detail-page .col-sm-6 {
+        padding: 0px;
+    }
+
+    .tour-pack-detail-page .card:last-child {
+        margin-bottom: 0px;
+    }
+
+    .tour-pack-detail-page .fs-5 {
+        font-size: 18px !important;
+    }
+
+    .tour-pack-detail-page .assigned-driver-profile-img {
+        width: 80px;
+        height: 80px;
+    }
 }
 
 @media (max-width: 575px) {
@@ -3394,310 +3704,3 @@ div.dataTables_wrapper .dataTables_paginate span .paginate_button:hover {
         grid-template-columns: repeat(1, 1fr);
     }
 }
-
-
-.custom-flatpickr {
-    width: 100%;
-    max-width: 330px;
-    margin: 0 auto;
-    padding: 10px;
-}
-
-/*
-.flatpickr-calendar {
-    width: 100% !important;
-    border-radius: 16px;
-    padding: 10px;
-    border: 1px solid #e5e7eb;
-    background: #ffffff;
-    padding: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-}
-
-
-.custom-flatpickr .flatpickr-months {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-.custom-flatpickr .flatpickr-month {
-    font-size: 18px;
-    font-weight: 600;
-    color: #111827;
-}
-
-.custom-flatpickr .flatpickr-prev-month,
-.custom-flatpickr .flatpickr-next-month {
-    padding: 8px;
-    border-radius: 8px;
-    transition: background 0.2s ease;
-}
-
-.custom-flatpickr .flatpickr-prev-month:hover,
-.custom-flatpickr .flatpickr-next-month:hover {
-    background: #f3f4f6;
-}
-
-
-.custom-flatpickr .flatpickr-weekdays {
-    margin-bottom: 6px;
-}
-
-.custom-flatpickr .flatpickr-weekday {
-    font-size: 13px;
-    font-weight: 600;
-    color: #6b8074;
-    text-transform: uppercase;
-}
-
-
-.custom-flatpickr .flatpickr-days {
-    padding-top: 8px;
-}
-
-
-.custom-flatpickr .flatpickr-day {
-    width: 56px;
-    height: 56px;
-    line-height: 56px;
-    margin: 2px;
-    font-size: 15px;
-    font-weight: 500;
-    color: #1f2937;
-    border-radius: 12px;
-    transition: all 0.2s ease;
-}
-
-
-.custom-flatpickr .flatpickr-day:hover {
-    background: #eef2ff;
-}
-
-
-.custom-flatpickr .flatpickr-day.today {
-    border: 2px solid #155799;
-}
-
-
-.custom-flatpickr .flatpickr-day.selected,
-.custom-flatpickr .flatpickr-day.selected:hover {
-    background: #159957;
-    border-color: #159957;
-    color: #ffffff;
-}
-
-
-.custom-flatpickr .flatpickr-day.disabled,
-.custom-flatpickr .flatpickr-day.flatpickr-disabled {
-    background: #f9fafb;
-    color: #9ca3af;
-    cursor: not-allowed;
-}
-
-
-.custom-flatpickr .flatpickr-day.prevMonthDay,
-.custom-flatpickr .flatpickr-day.nextMonthDay {
-    color: #d1d5db;
-}
-
-
-
-
-@media (max-width: 991px) {
-    .custom-flatpickr {
-        max-width: 480px;
-    }
-
-    .custom-flatpickr .flatpickr-day {
-        width: 50px;
-        height: 50px;
-        line-height: 50px;
-        font-size: 14px;
-    }
-}
-
-
-@media (max-width: 576px) {
-    .custom-flatpickr {
-        max-width: 100%;
-    }
-
-    .custom-flatpickr .flatpickr-calendar {
-        padding: 12px;
-        border-radius: 14px;
-    }
-
-    .custom-flatpickr .flatpickr-month {
-        font-size: 16px;
-    }
-
-    .custom-flatpickr .flatpickr-day {
-        width: 44px;
-        height: 44px;
-        line-height: 44px;
-        font-size: 14px;
-        border-radius: 10px;
-    }
-}
-
-
-#calendar {
-    width: 100%;
-    height: 90vh;
-    background: #ffffff;
-    padding: 16px;
-    border-radius: 8px;
-}
-
-.fc-toolbar {
-    background: linear-gradient(175deg, #159957, #155799);
-    padding: 14px 18px;
-    border-radius: 8px 8px 0 0;
-}
-
-.fc-toolbar-title {
-    font-size: 22px;
-    font-weight: 600;
-    color: #ffffff;
-}
-
-
-.fc-button {
-    background: #ffffff !important;
-    color: #155799 !important;
-    border: none !important;
-    font-weight: 600;
-    border-radius: 6px !important;
-    padding: 6px 12px;
-}
-
-.fc-button:hover {
-    background: #f0f0f0 !important;
-}
-
-.fc-button-active {
-    color: #159957 !important;
-}
-
-.fc-daygrid-day {
-    background: #f8fbff;
-    cursor: pointer;
-}
-
-.fc-daygrid-day:hover {
-    background: #e9f5ff;
-}
-
-
-.fc-col-header-cell {
-    background: #f1f8ff;
-    font-weight: 600;
-    color: #155799;
-}
-
-
-.fc-daygrid-day-number {
-    font-weight: 600;
-    color: #155799;
-}
-
-
-.fc-day-today {
-    background: rgba(21, 153, 87, 0.15) !important;
-}
-
-.fc-day-today .fc-daygrid-day-number {
-    color: #159957;
-}
-
-.fc-event {
-    background: linear-gradient(175deg, #159957, #155799) !important;
-    border: none !important;
-    border-radius: 6px;
-    padding: 2px 4px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #ffffff !important;
-}
-
-.fc-event:hover {
-    opacity: 0.9;
-    transform: scale(1.02);
-    transition: 0.15s ease;
-}
-
-
-.fc-booking-event {
-    white-space: normal;
-    padding: 4px;
-    line-height: 1.3;
-}
-
-.fc-guest-name {
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.fc-pickup {
-    font-size: 11px;
-    color: #ffeaa7;
-}
-
-
-
-.fc-disabled-day {
-    background: #f1f1f1 !important;
-    opacity: 0.6;
-}
-
-
-.fc-booked-day {
-    background: #ffeaea !important;
-    
-    opacity: 0.85;
-}
-
-
-.fc-disabled-day .fc-daygrid-day-frame,
-.fc-booked-day .fc-daygrid-day-frame {
-    pointer-events: none;
-}
-
-
-.fc-booked-day .fc-event {
-    pointer-events: auto;
-    cursor: pointer;
-}
-
-
-.fc-booked-day .fc-daygrid-day-number {
-    color: #dc3545;
-    font-weight: 700;
-}
-
-
-.fc-booked-day::after {
-    
-    font-size: 10px;
-    color: #dc3545;
-    display: block;
-    text-align: center;
-    margin-top: 2px;
-    font-weight: 600;
-}
-
-
-.fc .fc-day-sun .fc-col-header-cell-cushion,
-.fc .fc-day-sat .fc-col-header-cell-cushion {
-    color: #dc3545;
-}
-
-.fc .fc-day-mon .fc-col-header-cell-cushion,
-.fc .fc-day-tue .fc-col-header-cell-cushion,
-.fc .fc-day-wed .fc-col-header-cell-cushion,
-.fc .fc-day-thu .fc-col-header-cell-cushion,
-.fc .fc-day-fri .fc-col-header-cell-cushion {
-    color: #198754;
-} /*
