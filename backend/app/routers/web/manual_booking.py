@@ -345,7 +345,10 @@ def edit_manual_booking(
             TourPackageDriver.tour_package_id == booking.tour_package_id,
             Driver.company_id == company.id,
             Driver.is_deleted == False,
-            ~Driver.id.in_(booked_driver_ids)
+            or_(
+                ~Driver.id.in_(booked_driver_ids),
+                Driver.id == booking.driver_id
+            )
         )
         .all()
     )
