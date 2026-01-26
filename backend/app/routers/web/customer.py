@@ -12,6 +12,7 @@ from app.core.templates import templates
 from app.models.customer import Customer
 from app.utils.flash import flash_redirect
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from sqlalchemy import or_
 
 router = APIRouter(prefix="/customers", tags=["Customers"])
 
@@ -97,20 +98,49 @@ def create_page(
     )
 
 @router.post("/customers/create", name="customer_create")
-def create_customer(
+async def create_customer(
     request: Request,
     guest_name: str = Form(...),
     country_code: str = Form(...),
     phone: str = Form(...),
     email: str = Form(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(company_only)  # get current user
+    current_user: User = Depends(company_only)
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
+    errors = {}
 
+    # 🔍 DUPLICATE CHECK
+    duplicate = (
+        db.query(Customer)
+        .filter(
+            Customer.company_id == current_user.company.id,
+            Customer.is_deleted == False,
+            or_(
+                (Customer.phone == phone) & (Customer.country_code == country_code),
+                Customer.email == email if email else False
+            )
+        )
+        .first()
+    )
+
+    if duplicate:
+        if duplicate.phone == phone and duplicate.country_code == country_code:
+            errors["phone"] = "Phone number already exists"
+        if email and duplicate.email == email:
+            errors["email"] = "Email already exists"
+
+        if errors:
+            form_data = dict(await request.form())
+            return render_form(
+                request,
+                customer=None,   # <--- customer doesn't exist yet
+                form=form_data,
+                errors=errors
+            )
+
+    # ✅ CREATE CUSTOMER
     customer = Customer(
-        company_id=current_user.company.id,  # ✅ set company
+        company_id=current_user.company.id,
         guest_name=guest_name,
         country_code=country_code,
         phone=phone,
@@ -119,9 +149,11 @@ def create_customer(
 
     db.add(customer)
     db.commit()
-    db.refresh(customer)
 
-    return flash_redirect(request.url_for("customer_list"), "Customer created successfully")
+    return flash_redirect(
+        request.url_for("customer_list"),
+        "Customer created successfully"
+    )
 
 # =================================================
 # EDIT / UPDATE
@@ -145,21 +177,53 @@ def edit_page(
     )
 
 @router.post("/{customer_id}/edit", name="customer_update")
-def update_customer(
+async def update_customer(
     customer_id: int,
     request: Request,
     guest_name: str = Form(...),
     country_code: str = Form(...),
     phone: str = Form(...),
     email: str = Form(None),
-
     db: Session = Depends(get_db),
     _=Depends(company_only)
 ):
     customer = db.query(Customer).get(customer_id)
-    if not customer:
+    if not customer or customer.is_deleted:
         return flash_redirect(request.url_for("customer_list"), "Customer not found")
 
+    errors = {}
+
+    # 🔍 DUPLICATE CHECK (exclude current customer)
+    duplicate = (
+        db.query(Customer)
+        .filter(
+            Customer.company_id == customer.company_id,
+            Customer.id != customer.id,
+            Customer.is_deleted == False,
+            or_(
+                (Customer.phone == phone) & (Customer.country_code == country_code),
+                Customer.email == email if email else False
+            )
+        )
+        .first()
+    )
+
+    if duplicate:
+        if duplicate.phone == phone and duplicate.country_code == country_code:
+            errors["phone"] = "Phone number already exists"
+        if email and duplicate.email == email:
+            errors["email"] = "Email already exists"
+
+    if errors:
+        form_data = dict(await request.form())   # ✅ await here
+        return render_form(
+            request,
+            customer=customer,
+            form=form_data,
+        errors=errors
+    )
+
+    # ✅ UPDATE
     customer.guest_name = guest_name
     customer.country_code = country_code
     customer.phone = phone
@@ -168,9 +232,10 @@ def update_customer(
     db.commit()
 
     return flash_redirect(
-        url=request.url_for("customer_list"),
-        message="Customer updated successfully"
+        request.url_for("customer_list"),
+        "Customer updated successfully"
     )
+
 
 # =================================================
 # DELETE (SOFT)

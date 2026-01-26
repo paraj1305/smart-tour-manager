@@ -120,8 +120,6 @@ async def driver_create(
     db: Session = Depends(get_db),
     current_user: User = Depends(company_only),
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
 
     driver = Driver(
         company_id=current_user.company.id,

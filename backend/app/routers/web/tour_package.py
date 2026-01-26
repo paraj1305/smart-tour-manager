@@ -47,8 +47,7 @@ def my_tour_list(
     db: Session = Depends(get_db),
     current_user=Depends(company_only),
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
+
     company = current_user.company
 
     query = db.query(TourPackage).filter(
@@ -109,8 +108,6 @@ def create_page(
     db: Session = Depends(get_db),
     current_user=Depends(company_only)
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
 
     drivers = (
         db.query(Driver)

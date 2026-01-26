@@ -43,26 +43,30 @@
                         <!-- Customer Phone -->
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-semibold">Phone Number</label>
-                            <div class="input-group">   
+
+                            <div class="input-group">
                                 <select name="country_code"
-                                        id="country_code"
                                         class="form-select"
-                                        style="max-width: 110px;">
+                                        style="max-width:110px;">
                                     {% for code,name in country_codes %}
                                     <option value="{{ code }}"
                                         {% if customer and customer.country_code == code %}selected{% endif %}>
                                         {{ code }}
                                     </option>
                                     {% endfor %}
-                                </select>   
+                                </select>
+
                                 <input type="text"
-                                       name="phone"
-                                       class="form-control {% if errors.phone %}is-invalid{% endif %}"
-                                       value="{{ form.phone | default(customer.phone if customer else '') }}">
+                                    name="phone"
+                                    class="form-control {% if errors.phone %}is-invalid{% endif %}"
+                                    value="{{ form.phone | default(customer.phone if customer else '') }}">
                             </div>
-                            <span class="invalid-feedback">
-                                {{ errors.phone | default('') }}
-                            </span>
+
+                            {% if errors.phone %}
+                                <div class="invalid-feedback d-block">
+                                    {{ errors.phone }}
+                                </div>
+                            {% endif %}
                         </div>
 
                         <div class="col-md-4 mb-3">
@@ -71,9 +75,11 @@
                                    name="email"
                                    class="form-control {% if errors.email %}is-invalid{% endif %}"
                                    value="{{ form.email | default(customer.email if customer else '') }}">
-                            <span class="invalid-feedback">
-                                {{ errors.email | default('') }}
-                            </span>
+                            {% if errors.email %}
+                                <div class="invalid-feedback d-block">
+                                    {{ errors.email }}
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
 
