@@ -218,6 +218,8 @@ def create_manual_booking(
     try:
         phone_number = format_phone(country_code, phone)
         send_whatsapp_booking_confirmation(phone_number, booking)
+        send_whatsapp_driver_details(phone_number, booking)
+        
     except Exception:
         print(f"WhatsApp send failed for booking {booking.id}")
 
