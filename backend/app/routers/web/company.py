@@ -119,8 +119,6 @@ def company_list(
     request: Request,
     current_user: User = Depends(admin_only)
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
 
     return templates.TemplateResponse(
         "companies/list.html",
@@ -135,8 +133,6 @@ def create_page(
     request: Request,
     current_user: User = Depends(admin_only)
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
 
     return render_form(request, currencies=CURRENCIES, countries=COUNTRIES, country_codes=COUNTRY_CODES)
 
@@ -153,8 +149,6 @@ async def create_company(
     db: Session = Depends(get_db),
     current_user: User = Depends(admin_only),
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
 
     try:
         CompanyCreate(
@@ -234,8 +228,6 @@ def edit_page(
     db: Session = Depends(get_db),
     current_user: User = Depends(admin_only)
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
 
     company = db.query(Company).get(company_id)
     if not company:
@@ -270,8 +262,6 @@ def update_company(
     db: Session = Depends(get_db),
     current_user: User = Depends(admin_only)
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
 
     company = db.query(Company).get(company_id)
     if not company:
@@ -300,8 +290,6 @@ def delete_company(
     db: Session = Depends(get_db),
     current_user: User = Depends(admin_only)
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
 
     company = db.query(Company).get(company_id)
     if not company:
@@ -321,8 +309,6 @@ def my_profile(
     request: Request,
     current_user: User = Depends(get_current_user)
 ):
-    if isinstance(current_user, RedirectResponse):
-        return current_user
 
     if not current_user.company:
         return redirect_with_message(request, "Company profile not found")
@@ -360,8 +346,7 @@ def update_my_profile(
     current_user: User = Depends(get_current_user)
 ):
     company = current_user.company
-    if isinstance(current_user, RedirectResponse):
-        return current_user
+
     # ✅ Validate using CompanyUpdate
     try:
         form = CompanyUpdate(

@@ -18,9 +18,15 @@
                 </div>
 
                 <div class="tour-body">
-                    <h5 class="tour-title">{{ tour.title }}</h5>
+                    <h5 class="tour-title">{{ tour.title }},{{ tour.city }}</h5>
                     <div class="tour-meta">
-                        <span>{{ tour.city }}, {{ tour.country }}</span>
+                        {% if tour.itinerary %}
+                        <hr>
+                        <h6 class="fw-semibold">Itinerary</h6>
+                        <div class="text-muted">
+                            {{ tour.itinerary | safe }}
+                        </div>
+                        {% endif %}
                         <span class="price">{{tour.currency}} {{ tour.price }}</span>
                     </div>
 

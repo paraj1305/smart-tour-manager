@@ -383,7 +383,7 @@ def update_manual_booking(
     total_amount: float = Form(...),
     advance_amount: float = Form(...),
     db: Session = Depends(get_db),
-    current_user=Depends(admin_only),
+    current_user=Depends(company_only),
 ):
 
     # 1️⃣ Fetch the booking first
@@ -484,7 +484,7 @@ def delete_manual_booking(
     request: Request,
     booking_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(admin_only),
+    current_user=Depends(company_only),
 ):
     booking = db.query(ManualBooking).get(booking_id)
     db.delete(booking)
