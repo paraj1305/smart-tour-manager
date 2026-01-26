@@ -345,7 +345,10 @@ def edit_manual_booking(
             TourPackageDriver.tour_package_id == booking.tour_package_id,
             Driver.company_id == company.id,
             Driver.is_deleted == False,
-            ~Driver.id.in_(booked_driver_ids)
+            or_(
+                ~Driver.id.in_(booked_driver_ids),
+                Driver.id == booking.driver_id
+            )
         )
         .all()
     )
@@ -380,7 +383,7 @@ def update_manual_booking(
     total_amount: float = Form(...),
     advance_amount: float = Form(...),
     db: Session = Depends(get_db),
-    current_user=Depends(admin_only),
+    current_user=Depends(company_only),
 ):
 
     # 1️⃣ Fetch the booking first
@@ -481,7 +484,7 @@ def delete_manual_booking(
     request: Request,
     booking_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(admin_only),
+    current_user=Depends(company_only),
 ):
     booking = db.query(ManualBooking).get(booking_id)
     db.delete(booking)

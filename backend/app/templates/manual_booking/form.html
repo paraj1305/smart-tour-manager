@@ -341,36 +341,55 @@ $('#customer_select').select2({
             loadAvailableDrivers();
         });
 
-        function loadAvailableDrivers() {
-            const packageId = $('[name="tour_package_id"]').val();
-            const travelDate = $('[name="travel_date"]').val();
-            const driverSelect = $('[name="driver_id"]');
+function loadAvailableDrivers() {
+    const packageId = $('[name="tour_package_id"]').val();
+    const travelDate = $('[name="travel_date"]').val();
+    const driverSelect = $('[name="driver_id"]');
 
-            if (!packageId || !travelDate) return;
+    if (!packageId || !travelDate) return;
 
-            const url = $('#showAllDrivers').is(':checked')
-                ? `/manual-bookings/all-drivers/${packageId}/${travelDate}`
-                : `/manual-bookings/available-drivers/${packageId}/${travelDate}`;
+    const url = $('#showAllDrivers').is(':checked')
+        ? `/manual-bookings/all-drivers/${packageId}/${travelDate}`
+        : `/manual-bookings/available-drivers/${packageId}/${travelDate}`;
 
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    driverSelect.empty().append('<option value=""></option>');
+    const currentDriver = {
+        id: "{{ booking.driver.id if booking and booking.driver else '' }}",
+        text: "{{ booking.driver.name if booking and booking.driver else '' }} — {{ booking.driver.vehicle_type if booking and booking.driver else '' }} {{ booking.driver.seats if booking and booking.driver else '' }} seats ({{ booking.driver.vehicle_number if booking and booking.driver else '' }})"
+    };
 
-                    if (!data.length) {
-                        driverSelect.append('<option>No drivers available</option>');
-                        return;
-                    }
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            driverSelect.empty().append('<option value=""></option>');
 
-                    data.forEach(d => {
-                        driverSelect.append(
-                            `<option value="${d.id}">${d.name} - ${d.phone}</option>`
-                        );
-                    });
+            let found = false;
 
-                    driverSelect.trigger('change');
-                });
-        }
+            data.forEach(d => {
+                const selected = currentDriver.id == d.id;
+                if (selected) found = true;
+
+                driverSelect.append(
+                    `<option value="${d.id}" ${selected ? 'selected' : ''}>
+                        ${d.name} — ${d.vehicle_type} ${d.seats} seats (${d.vehicle_number})
+                    </option>`
+                );
+            });
+
+            // 🔥 If editing & current driver not in API → force inject
+            if (currentDriver.id && !found) {
+                const option = new Option(
+                    currentDriver.text,
+                    currentDriver.id,
+                    true,
+                    true
+                );
+                driverSelect.append(option);
+            }
+
+            driverSelect.trigger('change.select2');
+        });
+}
+
 
         $('[name="tour_package_id"], [name="travel_date"]').on(
             'change',
