@@ -10,11 +10,11 @@
   </div>
 </section>
 
-<section class="content">
-  <div class="container-fluid">
+<section class="content tour-pack-detail-page">
+  <div class="container-fluid py-4">
 
     <!-- ================= TOUR PACKAGE DETAILS (TOP - 12 COL) ================= -->
-    <div class="row mb-4">
+    <div class="row mb-md-4 ">
       <div class="col-12">
         <div class="card shadow-sm rounded-3 p-4">
 
@@ -37,7 +37,7 @@
 
           {% if booking.tour_package.itinerary %}
           <hr>
-          <h6 class="fw-semibold">Itinerary</h6>
+          <h6 class="fw-bold">Itinerary</h6>
           <div class="text-muted">
             {{ booking.tour_package.itinerary | safe }}
           </div>
@@ -45,7 +45,7 @@
 
           {% if booking.tour_package.excludes %}
           <hr>
-          <h6 class="fw-semibold">Excludes</h6>
+          <h6 class="fw-bold">Excludes</h6>
           <div class="text-muted">
             {{ booking.tour_package.excludes | safe }}
           </div>
@@ -59,80 +59,82 @@
     <div class="row g-4">
 
       <!-- LEFT SIDE -->
-      <div class="col-6 d-flex flex-column gap-3">
+      <div class="col-sm-6 d-flex flex-column ">
 
         <!-- Guest Info -->
         <div class="card shadow-sm rounded-3 p-3">
           <h6 class="text-muted mb-2">Guest Info</h6>
           <div class="fw-bold fs-5">{{ booking.customer.guest_name }}</div>
-          <small class="text-muted d-block">📞 {{ booking.customer.phone }}</small>
-          <small class="text-muted d-block">✉ {{ booking.customer.email or '-' }}</small>
-          <small class="text-muted d-block">📍 {{ booking.pickup_location or '-' }}</small>
-          <small class="text-muted d-block">👥 {{ booking.adults }} Adults, {{ booking.kids }} Kids</small>
+          <small class="text-muted d-block"><i class="fas fa-phone-alt text-dark me-2"></i> {{ booking.customer.phone
+            }}</small>
+          <small class="text-muted d-block"><i class="fas fa-envelope text-dark me-2"></i> {{ booking.customer.email or
+            '-' }}</small>
+          <small class="text-muted d-block"><i class="fas fa-map-marker-alt text-dark me-2"></i> {{
+            booking.pickup_location or '-' }}</small>
+          <small class="text-muted d-block"><i class="fas fa-users text-dark me-2"></i> {{ booking.adults }} Adults, {{
+            booking.kids }} Kids</small>
         </div>
 
         <!-- Payment Info -->
         <div class="card shadow-sm rounded-3 p-3">
           <h6 class="text-muted mb-2">Payment Info</h6>
           <div class="fw-bold fs-5">{{ booking.tour_package.currency }} {{ booking.total_amount }}</div>
-          <small class="text-success d-block">Paid: {{ booking.tour_package.currency }} {{ booking.advance_amount }}</small>
-          <small class="text-danger d-block">Remaining: {{ booking.tour_package.currency }} {{ booking.remaining_amount }}</small>
+          <small class="text-success d-block">Paid: {{ booking.tour_package.currency }} {{ booking.advance_amount
+            }}</small>
+          <small class="text-danger d-block">Remaining: {{ booking.tour_package.currency }} {{ booking.remaining_amount
+            }}</small>
         </div>
 
         <!-- Travel Info -->
         <div class="card shadow-sm rounded-3 p-3">
           <h6 class="text-muted mb-2">Travel Info</h6>
           <small class="text-muted d-block">
-            📅 {{ booking.travel_date.strftime("%Y-%m-%d") }}
+            <i class="fas fa-calendar-alt text-dark me-2"></i> {{ booking.travel_date.strftime("%Y-%m-%d") }}
           </small>
           <small class="text-muted d-block">
-            ⏰ {{ booking.travel_time or '-' }}
+            <i class="far fa-clock text-dark me-2"></i> {{ booking.travel_time or '-' }}
           </small>
         </div>
 
       </div>
 
       <!-- RIGHT SIDE -->
-      <div class="col-6">
+      <div class="col-sm-6">
         <div class="card shadow-sm rounded-3 p-3">
           <h6 class="text-muted mb-3">Assigned Driver</h6>
 
           {% if booking.driver %}
-            {% if booking.driver.image %}
-              <div class="rounded-circle overflow-hidden mx-auto mb-2"
-                   style="width:100px; height:100px;">
-                <img src="{{ url_for('static', path=booking.driver.image) }}"
-                     class="img-fluid h-100 w-100"
-                     style="object-fit: cover;"
-                     alt="{{ booking.driver.name }}">
-              </div>
-            {% else %}
-              <div class="rounded-circle bg-secondary text-white
+          {% if booking.driver.image %}
+          <div class="rounded-circle overflow-hidden mb-2" style="width:100px; height:100px;">
+            <img src="{{ url_for('static', path=booking.driver.image) }}" class="img-fluid h-100 w-100"
+              style="object-fit: cover;" alt="{{ booking.driver.name }}">
+          </div>
+          {% else %}
+          <div class="rounded-circle bg-secondary assigned-driver-profile-img text-white
                           d-flex justify-content-center align-items-center
-                          mx-auto mb-2 fw-bold fs-5"
-                   style="width:100px; height:100px;">
-                {{ booking.driver.name[:2]|upper }}
-              </div>
-            {% endif %}
+                          mx-auto mb-2 fw-bold fs-5" style="width:100px; height:100px;">
+            {{ booking.driver.name[:2]|upper }}
+          </div>
+          {% endif %}
 
-            <div class="fw-bold text-center">
-              {{ booking.driver.name }}
-            </div>
-            <small class="text-muted d-block text-center">
-              📞 {{ booking.driver.phone_number }}
-            </small>
-            <small class="text-muted d-block text-center">
-              🚗 {{ booking.driver.vehicle_type }}
-              ({{ booking.driver.vehicle_number or '-' }})
-            </small>
-            <small class="text-muted d-block text-center">
-              🪑 Seats: {{ booking.driver.seats or '-' }}
-            </small>
+          <div class="fw-bold ">
+            {{ booking.driver.name }}
+          </div>
+          <small class="text-muted d-block ">
+            <i class="fas fa-phone-alt text-dark me-2"></i> {{ booking.driver.phone_number }}
+          </small>
+          <small class="text-muted d-block ">
+            <i class="fas fa-car text-dark me-2"></i> {{ booking.driver.vehicle_type }}
+            ({{ booking.driver.vehicle_number or '-' }})
+          </small>
+          <small class="text-muted d-block ">
+            <i class="fas fa-chair text-dark me-2"></i> Seats: {{ booking.driver.seats or '-' }}
+          </small>
 
           {% else %}
-            <small class="text-muted d-block text-center">
-              No driver assigned
-            </small>
+          <small class="text-muted d-block ">
+            No driver assigned
+          </small>
           {% endif %}
         </div>
       </div>
@@ -142,7 +144,7 @@
     <!-- BACK BUTTON -->
     <div class="mt-4">
       <a href="{{ url_for('tour_package_availability_page', package_id=booking.tour_package_id) }}"
-         class="btn btn-submit">
+        class="btn btn-submit">
         Back to Calendar
       </a>
     </div>

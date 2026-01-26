@@ -258,16 +258,16 @@ def manual_booking_datatable(
             "id": booking.id,
            "guest_details": f"""
                 <strong>{booking.customer.guest_name}</strong><br>
-                📞 {booking.customer.country_code}{booking.customer.phone}<br>
-                ✉️ {booking.customer.email or "-"}<br>
-                👨‍👩‍👧‍👦 {booking.adults} - {booking.kids}
+                <i class="fas fa-phone-alt text-dark"></i> {booking.customer.country_code}{booking.customer.phone}<br>
+                <i class="fas fa-envelope text-dark"></i> {booking.customer.email or "-"}<br>
+                <i class="fas fa-users text-dark"></i> {booking.adults} - {booking.kids}
             """,
 
             "travel_details": f"""
                 <strong>{booking.tour_package.title}</strong><br>
-                📅 {booking.travel_date.strftime("%d-%m-%Y")}<br>
-                ⏰ {booking.travel_time or "-"}<br>
-                📍 {booking.pickup_location or "-"}
+                <i class="fas fa-calendar-alt text-dark"></i> {booking.travel_date.strftime("%d-%m-%Y")}<br>
+                <i class="far fa-clock text-dark"></i> {booking.travel_time or "-"}<br>
+                <i class="fas fa-map-marker-alt text-dark"></i> {booking.pickup_location or "-"}
             """,
 
             "payment_details": f"""
