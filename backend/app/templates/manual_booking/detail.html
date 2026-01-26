@@ -64,9 +64,9 @@
         <!-- Guest Info -->
         <div class="card shadow-sm rounded-3 p-3">
           <h6 class="text-muted mb-2">Guest Info</h6>
-          <div class="fw-bold fs-5">{{ booking.guest_name }}</div>
-          <small class="text-muted d-block">📞 {{ booking.phone }}</small>
-          <small class="text-muted d-block">✉ {{ booking.email or '-' }}</small>
+          <div class="fw-bold fs-5">{{ booking.customer.guest_name }}</div>
+          <small class="text-muted d-block">📞 {{ booking.customer.phone }}</small>
+          <small class="text-muted d-block">✉ {{ booking.customer.email or '-' }}</small>
           <small class="text-muted d-block">📍 {{ booking.pickup_location or '-' }}</small>
           <small class="text-muted d-block">👥 {{ booking.adults }} Adults, {{ booking.kids }} Kids</small>
         </div>

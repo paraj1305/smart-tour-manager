@@ -126,7 +126,7 @@ def dashboard_stats(
     company = current_user.company if current_user else None
     currency = company.currency if company else "USD"
 
-    # Monthly bookings array for chart
+    # Monthly bookings
     monthly_bookings = []
     for month in range(1, 13):
         count = (
@@ -140,32 +140,40 @@ def dashboard_stats(
         )
         monthly_bookings.append(count)
 
-    # Yearly and current month bookings
     yearly_bookings = sum(monthly_bookings)
     monthly_bookings_current = monthly_bookings[current_month - 1]
 
-    # Yearly revenue (paid only)
     yearly_revenue = (
         db.query(func.coalesce(func.sum(ManualBooking.total_amount), 0))
         .filter(
             ManualBooking.is_deleted == False,
-            ManualBooking.payment_status == "paid",
             extract("year", ManualBooking.created_at) == current_year
         )
         .scalar()
     )
 
-    # Monthly revenue (paid only)
     monthly_revenue = (
         db.query(func.coalesce(func.sum(ManualBooking.total_amount), 0))
         .filter(
             ManualBooking.is_deleted == False,
-            ManualBooking.payment_status == "paid",
             extract("year", ManualBooking.created_at) == current_year,
             extract("month", ManualBooking.created_at) == current_month
         )
         .scalar()
     )
+
+    monthly_revenue_per_year = []
+    for month in range(1, 13):
+        revenue = (
+            db.query(func.coalesce(func.sum(ManualBooking.total_amount), 0))
+            .filter(
+                ManualBooking.is_deleted == False,
+                extract("year", ManualBooking.created_at) == current_year,
+                extract("month", ManualBooking.created_at) == month
+            )
+            .scalar()
+        )
+        monthly_revenue_per_year.append(float(revenue))
 
     return JSONResponse({
         "year": current_year,
@@ -176,4 +184,5 @@ def dashboard_stats(
         "monthly_bookings_per_year": monthly_bookings,
         "yearly_revenue": float(yearly_revenue),
         "monthly_revenue": float(monthly_revenue),
+        "monthly_revenue_per_year": monthly_revenue_per_year,
     })

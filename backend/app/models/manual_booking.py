@@ -17,9 +17,9 @@ class ManualBooking(Base):
     __tablename__ = "manual_bookings"
 
     id = Column(Integer, primary_key=True, index=True)
-    guest_name = Column(String(150), nullable=False)
-    country_code = Column(String(10), nullable=False, server_default='+91')
-    phone = Column(String(20), nullable=False)
+    guest_name = Column(String(150), nullable=True)
+    country_code = Column(String(10), nullable=True, server_default='+91')
+    phone = Column(String(20), nullable=True)
     email = Column(String(150), nullable=True)
     adults = Column(Integer, nullable=False, default=1)
     kids = Column(Integer, nullable=False, default=0)
@@ -33,6 +33,7 @@ class ManualBooking(Base):
         ForeignKey("drivers.id"),
         nullable=True    
     )
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)
     travel_date = Column(Date, nullable=False)
     travel_time = Column(Time, nullable=True)
     total_amount = Column(Numeric(10, 2), nullable=False)
@@ -48,4 +49,4 @@ class ManualBooking(Base):
 
     tour_package = relationship("TourPackage")
     driver = relationship("Driver", back_populates="bookings")
-
+    customer = relationship("Customer", back_populates="bookings")

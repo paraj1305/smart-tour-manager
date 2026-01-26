@@ -24,19 +24,23 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Select Customer</label>
+                        <select id="customer_select" class="form-select" style="width:100%"></select>
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Guest Name</label>
                             <input type="text" name="guest_name" class="form-control"
-                                value="{{ booking.guest_name if booking else '' }}">
+                                value="{{ booking.customer.guest_name if booking else '' }}">
                         </div>
 
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label fw-semibold">Phone Number</label>
 
                             <div class="input-group">
                                 <select name="country_code" id="country_code" class="form-select"
                                     style="max-width:110px;">
                                     {% for code,name in country_codes %}
-                                    <option value="{{ code }}" {% if booking and booking.country_code==code %} selected
+                                    <option value="{{ code }}" {% if booking and booking.customer.country_code==code %} selected
                                         {% endif %}>
                                         {{ code }}
                                     </option>
@@ -44,28 +48,30 @@
                                 </select>
 
                                 <input type="text" name="phone" class="form-control"
-                                    value="{{ booking.phone if booking else '' }}" placeholder="Phone number">
+                                    value="{{ booking.customer.phone if booking else '' }}" placeholder="Phone number">
                             </div>
                         </div>
 
 
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label fw-semibold">Email</label>
                             <input type="email" name="email" class="form-control"
-                                value="{{ booking.email if booking else '' }}">
+                                value="{{ booking.customer.email if booking else '' }}">
                         </div>
 
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label fw-semibold">Adults</label>
-                            <input type="number" name="adults" class="form-control"
-                                value="{{ booking.adults if booking else 1 }}">
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label fw-semibold">Kids</label>
-                            <input type="number" name="kids" class="form-control"
-                                value="{{ booking.kids if booking else 0 }}">
-                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold">Passengers</label>
 
+                            <div class="input-group">
+                                <span class="input-group-text">Adults</span>
+                                <input type="number" name="adults" class="form-control"
+                                    value="{{ booking.adults if booking else 1 }}" min="1">
+
+                                <span class="input-group-text">Kids</span>
+                                <input type="number" name="kids" class="form-control"
+                                    value="{{ booking.kids if booking else 0 }}" min="0">
+                            </div>
+                        </div>
 
                     </div>
 
@@ -177,6 +183,7 @@
 {% endblock %}
 
 {% block extra_js %}
+
 <script>
     $(document).ready(function () {
         /* Validation */
@@ -206,7 +213,50 @@ $("#manual-booking-form").validate({
         }
     }
 });
-    $('.select2').select2({ width: '100%', allowClear: true });
+
+$('.select2').select2({
+    width: '100%',
+    allowClear: true
+});
+
+// customer ajax select2 (MUST be separate)
+$('#customer_select').select2({
+    width: '100%',
+    placeholder: "Search customer by name / phone",
+    allowClear: true,
+    minimumInputLength: 1,
+    ajax: {
+        url: "{{ url_for('customer_search') }}",
+        dataType: 'json',
+        delay: 300,
+        data: function (params) {
+            return { q: params.term };
+        },
+        processResults: function (data) {
+            return {
+                results: data.results
+            };
+        }
+    }
+});
+
+
+    // Autofill on select
+    $('#customer_select').on('select2:select', function (e) {
+        const data = e.params.data;
+
+        $('[name="guest_name"]').val(data.guest_name);
+        $('[name="email"]').val(data.email || '');
+        $('[name="phone"]').val(data.phone);
+        $('[name="country_code"]').val(data.country_code).trigger('change');
+    });
+
+    // Clear fields if customer removed
+    $('#customer_select').on('select2:clear', function () {
+        $('[name="guest_name"]').val('');
+        $('[name="email"]').val('');
+        $('[name="phone"]').val('');
+    });
 
         const packageSelect = $('[name="tour_package_id"]');
 

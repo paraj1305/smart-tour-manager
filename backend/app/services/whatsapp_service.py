@@ -27,7 +27,7 @@ def send_whatsapp_booking_confirmation(phone_number: str, booking):
                 {
                     "type": "body",
                     "parameters": [
-                        {"type": "text", "text": booking.guest_name},                        # {{1}}
+                        {"type": "text", "text": booking.customer.guest_name},                        # {{1}}
                         {"type": "text", "text": booking.tour_package.title},                 # {{2}}
                         {"type": "text", "text": str(booking.travel_date)},                   # {{3}}
                         {"type": "text", "text": str(booking.travel_time or "-")},           # {{4}}

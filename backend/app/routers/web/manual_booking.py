@@ -1,17 +1,18 @@
 from urllib import request
-from fastapi import APIRouter, Depends, Request, Form
+from fastapi import APIRouter, Depends,Query, Request, Form
 from sqlalchemy.orm import Session
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from app.database.session import get_db
 from app.models.manual_booking import ManualBooking
 from app.models.tour_package import TourPackage,TourPackageDriver
 from app.models.driver import Driver
+from app.models.customer import Customer
 from app.schemas.manual_booking import ManualBookingCreate
 from app.core.templates import templates
 from app.auth.dependencies import admin_only, company_only
 from app.utils.flash import flash_redirect
 from typing import Optional, List
-from sqlalchemy import func,and_,or_
+from sqlalchemy import func,and_,or_, cast, String
 from datetime import date
 from twilio.rest import Client
 from app.core.constants import COUNTRY_CODES
@@ -83,6 +84,41 @@ def manual_booking_create_page(
         }
     )
 
+@router.get("/customers/search", name="customer_search")
+def customer_search(
+    q: str = Query(None, min_length=1),
+    db: Session = Depends(get_db)
+):
+    if not q:
+        return {"results": []}
+
+    customers = (
+        db.query(Customer)
+        .filter(
+            or_(
+                Customer.guest_name.ilike(f"%{q}%"),
+                cast(Customer.phone, String).ilike(f"%{q}%"),
+                Customer.email.ilike(f"%{q}%")
+            )
+        )
+        .limit(10)
+        .all()
+    )
+
+    results = [
+        {
+            "id": c.id,
+            "text": f"{c.guest_name} ({c.country_code}{c.phone})",
+            "guest_name": c.guest_name,
+            "email": c.email,
+            "phone": c.phone,
+            "country_code": c.country_code
+        }
+        for c in customers
+    ]
+
+    return {"results": results}
+
 @router.post("/create", name="manual_booking_create")
 def create_manual_booking(
     request: Request,
@@ -100,8 +136,37 @@ def create_manual_booking(
     total_amount: float = Form(...),
     advance_amount: float = Form(0),
     db: Session = Depends(get_db),
-    current_user=Depends(admin_only),
+    current_user=Depends(company_only),
 ):
+    company = current_user.company
+
+    phone = phone.strip()
+    country_code = country_code.strip()
+
+    customer = (
+        db.query(Customer)
+        .filter(
+            Customer.company_id == company.id,
+            Customer.phone == phone,
+            Customer.country_code == country_code,
+            Customer.is_deleted == False
+        )
+        .first()
+    )
+
+    if customer:
+        print("Existing customer:", customer.id)
+    else:
+        customer = Customer(
+            company_id=company.id,
+            guest_name=guest_name,
+            country_code=country_code,
+            phone=phone,
+            email=email,
+        )
+        db.add(customer)
+        db.commit()
+        db.refresh(customer)
 
     # ✅ DRIVER CONFLICT CHECK
     if driver_id:
@@ -131,10 +196,7 @@ def create_manual_booking(
     )
 
     booking = ManualBooking(
-        guest_name=guest_name,
-        country_code=country_code,
-        phone=phone,
-        email=email,
+        customer_id=customer.id,
         adults=adults,
         kids=kids,
         pickup_location=pickup_location,
@@ -152,12 +214,12 @@ def create_manual_booking(
     db.commit()
     db.refresh(booking)
 
+    # ✅ WhatsApp notification
     try:
         phone_number = format_phone(country_code, phone)
         send_whatsapp_booking_confirmation(phone_number, booking)
-
-    except Exception as e:
-       print("WhatsApp send failed for booking %s", booking.id)
+    except Exception:
+        print(f"WhatsApp send failed for booking {booking.id}")
 
     return flash_redirect(
         url=request.url_for("manual_booking_list"),
@@ -195,9 +257,9 @@ def manual_booking_datatable(
         data.append({
             "id": booking.id,
            "guest_details": f"""
-                <strong>{booking.guest_name}</strong><br>
-                📞 {booking.country_code}{booking.phone}<br>
-                ✉️ {booking.email or "-"}<br>
+                <strong>{booking.customer.guest_name}</strong><br>
+                📞 {booking.customer.country_code}{booking.customer.phone}<br>
+                ✉️ {booking.customer.email or "-"}<br>
                 👨‍👩‍👧‍👦 {booking.adults} - {booking.kids}
             """,
 
@@ -236,7 +298,7 @@ def manual_booking_datatable(
 @router.get("/", response_class=HTMLResponse, name="manual_booking_list")
 def manual_booking_list(
     request: Request,
-    _=Depends(admin_only)
+    _=Depends(company_only)
 ):
     return templates.TemplateResponse(
         "manual_booking/list.html",
@@ -321,9 +383,52 @@ def update_manual_booking(
     current_user=Depends(admin_only),
 ):
 
+    # 1️⃣ Fetch the booking first
     booking = db.query(ManualBooking).get(booking_id)
+    if not booking:
+        return flash_redirect(
+            url=request.url_for("manual_booking_list"),
+            message="Booking not found.",
+            category="error"
+        )
 
-    # ✅ DRIVER CONFLICT CHECK
+    # 2️⃣ Update or create customer
+    if booking.customer_id:
+        customer = db.query(Customer).get(booking.customer_id)
+        if customer:
+            customer.guest_name = guest_name
+            customer.country_code = country_code
+            customer.phone = phone
+            customer.email = email
+        else:
+            # Booking has customer_id but customer not found — create new
+            customer = Customer(
+                company_id=current_user.company.id,
+                guest_name=guest_name,
+                country_code=country_code,
+                phone=phone,
+                email=email
+            )
+            db.add(customer)
+            db.flush()  # to get customer.id
+            booking.customer_id = customer.id
+    else:
+        # No customer linked — create new
+        customer = Customer(
+            company_id=current_user.company.id,
+            guest_name=guest_name,
+            country_code=country_code,
+            phone=phone,
+            email=email
+        )
+        db.add(customer)
+        db.flush()  # to get customer.id
+        booking.customer_id = customer.id
+
+    db.commit()
+    db.refresh(customer)
+
+    # 3️⃣ Check driver conflict
     if driver_id:
         conflict = (
             db.query(ManualBooking)
@@ -335,7 +440,6 @@ def update_manual_booking(
             )
             .first()
         )
-
         if conflict:
             return flash_redirect(
                 url=request.url_for(
@@ -346,11 +450,7 @@ def update_manual_booking(
                 category="error",
             )
 
-    # ✅ UPDATE BOOKING
-    booking.guest_name = guest_name
-    booking.country_code = country_code
-    booking.phone = phone
-    booking.email = email
+    # 4️⃣ Update booking fields
     booking.adults = adults
     booking.kids = kids
     booking.tour_package_id = tour_package_id
@@ -374,6 +474,7 @@ def update_manual_booking(
         url=request.url_for("manual_booking_list"),
         message="Booking updated successfully.",
     )
+
 
 @router.post("/{booking_id}/delete", name="manual_booking_delete")
 def delete_manual_booking(
@@ -462,7 +563,7 @@ def get_booked_dates(
     for b in bookings:
         bookings_data.append({
             "id": b.id, 
-            "guest_name": b.guest_name,
+            "guest_name": b.customer.guest_name,
             "pickup_location": b.pickup_location or "",
             "travel_date": b.travel_date.strftime("%Y-%m-%d"),
             "travel_time": b.travel_time or "",
