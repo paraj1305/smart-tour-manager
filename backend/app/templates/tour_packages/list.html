@@ -9,16 +9,13 @@
 
             <div class="tour-packages-header d-flex align-items-center">
                 <!-- Heading -->
-                <h1 class="mb-0">My Tour Packages</h1>
+                <h1 class="mb-0 tour-packages-title">My Tour Packages</h1>
 
                 <!-- Live Search -->
                 <input type="text" id="live-search" class="form-control" placeholder="Search by title, city, country..."
                     value="{{ search }}">
 
-                <input type="text"
-                    id="availability-date"
-                    class="form-control"
-                    placeholder="Select date"
+                <input type="text" id="availability-date" class="form-control" placeholder="Select date"
                     value="{% if travel_date %}{{ travel_date }}{% endif %}">
 
                 <!-- Add Button -->
@@ -56,7 +53,7 @@
         );
     });
 
-        // ---------------- SEARCH + DATE FILTER ----------------
+    // ---------------- SEARCH + DATE FILTER ----------------
     const searchInput = document.getElementById("live-search");
     const dateInput = document.getElementById("availability-date");
     const tableContainer = document.getElementById("table-container");
@@ -79,11 +76,11 @@
                 "X-Requested-With": "XMLHttpRequest"
             }
         })
-        .then(response => response.text())
-        .then(html => {
-            tableContainer.innerHTML = html;
-        })
-        .catch(err => console.error("Filter error:", err));
+            .then(response => response.text())
+            .then(html => {
+                tableContainer.innerHTML = html;
+            })
+            .catch(err => console.error("Filter error:", err));
     }
 
     // 🔍 Live search (debounced)
@@ -113,64 +110,64 @@
     });
 
 
-let availabilityPicker = null;
-let selectedPackageId = null;
+    let availabilityPicker = null;
+    let selectedPackageId = null;
 
-$(document).on('click', '.check-availability-btn', function () {
+    $(document).on('click', '.check-availability-btn', function () {
 
-    selectedPackageId = $(this).data('package-id');
-    const title = $(this).data('package-title');
+        selectedPackageId = $(this).data('package-id');
+        const title = $(this).data('package-title');
 
-    $('#availabilityTitle').text(`Availability – ${title}`);
+        $('#availabilityTitle').text(`Availability – ${title}`);
 
-    const modalEl = document.getElementById('availabilityModal');
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
+        const modalEl = document.getElementById('availabilityModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
 
-    modalEl.addEventListener('shown.bs.modal', function () {
+        modalEl.addEventListener('shown.bs.modal', function () {
 
-        // Destroy previous picker
-        if (availabilityPicker) {
-            availabilityPicker.destroy();
-            availabilityPicker = null;
-        }
-
-        // Init flatpickr
-        availabilityPicker = flatpickr(
-            document.getElementById('availabilityCalendar'),
-            {
-                inline: true,
-                dateFormat: "Y-m-d",
-                minDate: "today",
-                disableMobile: true,
-                onReady: function(selectedDates, dateStr, instance) {
-                    instance.calendarContainer.classList.add('custom-flatpickr');
-                },
-
-                onChange: function (selectedDates, dateStr) {
-
-                    document.getElementById('auto_package_id').value = selectedPackageId;
-                    document.getElementById('auto_travel_date').value = dateStr;
-                    document.getElementById('autoBookingForm').submit();
-                }
+            // Destroy previous picker
+            if (availabilityPicker) {
+                availabilityPicker.destroy();
+                availabilityPicker = null;
             }
-        );
 
-        // Fetch booked dates
-        fetch(`/manual-bookings/booked-dates/${selectedPackageId}`)
-            .then(res => res.json())
-            .then(data => {
-                const bookedDates = Array.isArray(data.booked_dates)
-                    ? data.booked_dates
-                    : [];
+            // Init flatpickr
+            availabilityPicker = flatpickr(
+                document.getElementById('availabilityCalendar'),
+                {
+                    inline: true,
+                    dateFormat: "Y-m-d",
+                    minDate: "today",
+                    disableMobile: true,
+                    onReady: function (selectedDates, dateStr, instance) {
+                        instance.calendarContainer.classList.add('custom-flatpickr');
+                    },
 
-                availabilityPicker.set('disable', bookedDates);
-            })
-            .catch(err => {
-                console.error("Error fetching booked dates:", err);
-            });
+                    onChange: function (selectedDates, dateStr) {
 
-    }, { once: true });
-});
+                        document.getElementById('auto_package_id').value = selectedPackageId;
+                        document.getElementById('auto_travel_date').value = dateStr;
+                        document.getElementById('autoBookingForm').submit();
+                    }
+                }
+            );
+
+            // Fetch booked dates
+            fetch(`/manual-bookings/booked-dates/${selectedPackageId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const bookedDates = Array.isArray(data.booked_dates)
+                        ? data.booked_dates
+                        : [];
+
+                    availabilityPicker.set('disable', bookedDates);
+                })
+                .catch(err => {
+                    console.error("Error fetching booked dates:", err);
+                });
+
+        }, { once: true });
+    });
 </script>
 {% endblock %}

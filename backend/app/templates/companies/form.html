@@ -24,10 +24,10 @@
                         " class="shadow-sm p-4 rounded bg-white border" novalidate>
 
                     {% if is_my_profile %}
-                    <div class="raw mb-3">
+                    <div class="col-lg-12 profile-picture-upload mb-3">
                         <label class="form-label fw-semibold">Company Logo</label>
                         <div class="profile-picture d-flex" id="uploadTrigger">
-                            <div>
+                            <div class="profile-picture-inner-box">
 
                                 <img id="upload-file" src="{{ url_for('static', path='assets/icon/uploadFile.png') }}"
                                     {% if company.logo %}style="display:none" {% endif %} />
@@ -104,40 +104,34 @@
                                 </div>
 
                                 <!-- Phone -->
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Phone</label>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Phone</label>
 
-                                <div class="input-group">
-                                    <!-- Country Code -->
-                                    <select name="country_code"
-                                            id="country_code"
-                                            class="form-select"
+                                    <div class="input-group">
+                                        <!-- Country Code -->
+                                        <select name="country_code" id="country_code" class="form-select"
                                             style="max-width: 110px;">
-                                        {% for code, name in country_codes %}
-                                        <option value="{{ code }}"
-                                            {% if form.country_code == code
-                                                or (company and company.country_code == code) %}
-                                                selected
-                                            {% endif %}>
-                                            {{ code }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
+                                            {% for code, name in country_codes %}
+                                            <option value="{{ code }}" {% if form.country_code==code or (company and
+                                                company.country_code==code) %} selected {% endif %}>
+                                                {{ code }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
 
-                                    <!-- Phone Number -->
-                                    <input type="text"
-                                        name="phone"
-                                        class="form-control {% if errors.phone %}is-invalid{% endif %}"
-                                        value="{{ form.phone | default(company.phone if company else '') }}"
-                                        placeholder="Phone number">
+                                        <!-- Phone Number -->
+                                        <input type="text" name="phone"
+                                            class="form-control {% if errors.phone %}is-invalid{% endif %}"
+                                            value="{{ form.phone | default(company.phone if company else '') }}"
+                                            placeholder="Phone number">
+                                    </div>
+
+                                    {% if errors.phone %}
+                                    <span class="invalid-feedback d-block">
+                                        {{ errors.phone }}
+                                    </span>
+                                    {% endif %}
                                 </div>
-
-                                {% if errors.phone %}
-                                <span class="invalid-feedback d-block">
-                                    {{ errors.phone }}
-                                </span>
-                                {% endif %}
-                            </div>
 
                             </div>
 

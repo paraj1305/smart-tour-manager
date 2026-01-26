@@ -1,5 +1,5 @@
 from urllib import request
-from fastapi import APIRouter, Depends, Request, Form
+from fastapi import APIRouter, Depends,Query, Request, Form
 from sqlalchemy.orm import Session
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from app.database.session import get_db
@@ -12,7 +12,7 @@ from app.core.templates import templates
 from app.auth.dependencies import admin_only, company_only
 from app.utils.flash import flash_redirect
 from typing import Optional, List
-from sqlalchemy import func,and_,or_
+from sqlalchemy import func,and_,or_, cast, String
 from datetime import date
 from twilio.rest import Client
 from app.core.constants import COUNTRY_CODES
@@ -84,6 +84,41 @@ def manual_booking_create_page(
         }
     )
 
+@router.get("/customers/search", name="customer_search")
+def customer_search(
+    q: str = Query(None, min_length=1),
+    db: Session = Depends(get_db)
+):
+    if not q:
+        return {"results": []}
+
+    customers = (
+        db.query(Customer)
+        .filter(
+            or_(
+                Customer.guest_name.ilike(f"%{q}%"),
+                cast(Customer.phone, String).ilike(f"%{q}%"),
+                Customer.email.ilike(f"%{q}%")
+            )
+        )
+        .limit(10)
+        .all()
+    )
+
+    results = [
+        {
+            "id": c.id,
+            "text": f"{c.guest_name} ({c.country_code}{c.phone})",
+            "guest_name": c.guest_name,
+            "email": c.email,
+            "phone": c.phone,
+            "country_code": c.country_code
+        }
+        for c in customers
+    ]
+
+    return {"results": results}
+
 @router.post("/create", name="manual_booking_create")
 def create_manual_booking(
     request: Request,
@@ -103,17 +138,35 @@ def create_manual_booking(
     db: Session = Depends(get_db),
     current_user=Depends(company_only),
 ):
-    customer = Customer(
-        company_id=current_user.id,
-        guest_name=guest_name,
-        country_code=country_code,
-        phone=phone,
-        email=email,
+    company = current_user.company
+
+    phone = phone.strip()
+    country_code = country_code.strip()
+
+    customer = (
+        db.query(Customer)
+        .filter(
+            Customer.company_id == company.id,
+            Customer.phone == phone,
+            Customer.country_code == country_code,
+            Customer.is_deleted == False
+        )
+        .first()
     )
 
-    db.add(customer)
-    db.commit()
-    db.refresh(customer)
+    if customer:
+        print("Existing customer:", customer.id)
+    else:
+        customer = Customer(
+            company_id=company.id,
+            guest_name=guest_name,
+            country_code=country_code,
+            phone=phone,
+            email=email,
+        )
+        db.add(customer)
+        db.commit()
+        db.refresh(customer)
 
     # ✅ DRIVER CONFLICT CHECK
     if driver_id:
@@ -161,12 +214,12 @@ def create_manual_booking(
     db.commit()
     db.refresh(booking)
 
+    # ✅ WhatsApp notification
     try:
         phone_number = format_phone(country_code, phone)
         send_whatsapp_booking_confirmation(phone_number, booking)
-
-    except Exception as e:
-       print("WhatsApp send failed for booking %s", booking.id)
+    except Exception:
+        print(f"WhatsApp send failed for booking {booking.id}")
 
     return flash_redirect(
         url=request.url_for("manual_booking_list"),
