@@ -16,7 +16,7 @@ from sqlalchemy import func,and_,or_, cast, String
 from datetime import date
 from twilio.rest import Client
 from app.core.constants import COUNTRY_CODES
-from app.services.whatsapp_service import send_whatsapp_booking_confirmation, format_phone
+from app.services.whatsapp_service import send_whatsapp_booking_confirmation, format_phone, send_whatsapp_driver_details, send_whatsapp_text
 
 router = APIRouter(prefix="/manual-bookings", tags=["Manual Booking"])
 
@@ -24,11 +24,11 @@ router = APIRouter(prefix="/manual-bookings", tags=["Manual Booking"])
 # Route WITHOUT package_id
 # -------------------------------
 @router.post(
-    "/manual-bookings/create",
+    "/package/create",
     name="autofill_booking_create_page"
 )
 @router.get(
-    "/manual-bookings/create",
+    "/create",
     name="manual_booking_create_page"
 )
 def manual_booking_create_page(
@@ -138,6 +138,7 @@ def create_manual_booking(
     db: Session = Depends(get_db),
     current_user=Depends(company_only),
 ):
+    print("manual_booking_create")
     company = current_user.company
 
     phone = phone.strip()
@@ -217,16 +218,38 @@ def create_manual_booking(
     # ✅ WhatsApp notification
     try:
         phone_number = format_phone(country_code, phone)
-        send_whatsapp_booking_confirmation(phone_number, booking)
-        send_whatsapp_driver_details(phone_number, booking)
-        
-    except Exception:
+        # send_whatsapp_booking_confirmation(phone_number, booking)
+        # send_whatsapp_driver_details(phone_number, booking)
+        # itinerary_text = (
+        #     "📍 Tour Itinerary:\n\n"
+        #     + html_to_whatsapp_text(booking.tour_package.itinerary)
+        # )
+
+        # send_whatsapp_text(phone_number, itinerary_text)
+
+    except Exception as e:
+        print("WhatsApp send failed", e)
         print(f"WhatsApp send failed for booking {booking.id}")
 
     return flash_redirect(
         url=request.url_for("manual_booking_list"),
         message="Booking created successfully.",
     )
+
+import re
+from html import unescape
+
+def html_to_whatsapp_text(html: str) -> str:
+    if not html:
+        return "-"
+
+    text = re.sub(r"<br\s*/?>", "\n", html)
+    text = re.sub(r"</p>", "\n", text)
+    text = re.sub(r"<li>", "• ", text)
+    text = re.sub(r"</li>", "\n", text)
+    text = re.sub(r"<.*?>", "", text)
+
+    return unescape(text).strip()
 
 # =================================================
 # DATATABLE API
@@ -297,7 +320,7 @@ def manual_booking_datatable(
 
     return JSONResponse({"data": data})
 
-@router.get("/", response_class=HTMLResponse, name="manual_booking_list")
+@router.get("", response_class=HTMLResponse, name="manual_booking_list")
 def manual_booking_list(
     request: Request,
     _=Depends(company_only)

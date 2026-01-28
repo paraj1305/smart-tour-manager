@@ -50,7 +50,7 @@ def render_form(
 # =================================================
 # LIST PAGE
 # =================================================
-@router.get("/", response_class=HTMLResponse, name="driver_list")
+@router.get("", response_class=HTMLResponse, name="driver_list")
 def driver_list(
     request: Request,
     _=Depends(company_only)

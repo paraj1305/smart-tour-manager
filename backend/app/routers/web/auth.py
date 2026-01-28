@@ -13,6 +13,7 @@ from app.services.email_service import send_reset_password_email
 from jose import jwt
 from dotenv import load_dotenv
 import os
+from app.routers.web.company_dashboard import dashboard_index
 
 BASE_URL = os.getenv("BASE_URL")
 
@@ -56,10 +57,16 @@ def login(
         "role": user.role
     })
 
-    response = RedirectResponse(
-        url=request.url_for("dashboard"),
-        status_code=302
-    )
+    if user.role == "company":
+        response = RedirectResponse(
+            url=request.url_for("dashboard_index"),
+            status_code=302
+        )
+    else:
+        response = RedirectResponse(
+            url=request.url_for("dashboard"),
+            status_code=302
+        )
 
     response.set_cookie(
         key="access_token",

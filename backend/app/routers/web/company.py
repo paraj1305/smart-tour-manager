@@ -24,7 +24,7 @@ from app.services.email_service import send_company_created_email
 # -------------------------------------------------
 # Router config
 # -------------------------------------------------
-router = APIRouter(prefix="/companies", tags=["Companies"])
+router = APIRouter(prefix="/company", tags=["Companies"])
 
 UPLOAD_DIR = "app/static/uploads/companies"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -321,6 +321,7 @@ def my_profile(
         is_my_profile=True,
         currencies=CURRENCIES,
         countries=COUNTRIES,
+        country_codes=COUNTRY_CODES,
         form={
             "company_name": company.company_name,
             "email": current_user.email,

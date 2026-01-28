@@ -27,9 +27,26 @@
             <ul class="nav nav-pills nav-sidebar flex-column">
 
                 <!-- Dashboard -->
-                <li class="nav-item">
+                <li class="nav-item role-company" style="display:none;">
                     <a href="{{ url_for('dashboard_index') }}" class="nav-link d-flex align-items-center
                         {% if request.url.path.startswith(url_for('dashboard_index').path) %}active{% endif %}">
+                        <div class="sidebar-nav-icon">
+                            <!-- Dashboard SVG -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none">
+                                <path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"
+                                    fill="currentColor" />
+                            </svg>
+
+                        </div>
+
+                        <p class="mb-0">Dashboard</p>
+                    </a>
+                </li>
+
+                <li class="nav-item role-admin" style="display:none;">
+                    <a href="{{ url_for('dashboard') }}" class="nav-link d-flex align-items-center
+                        {% if request.url.path.startswith(url_for('dashboard').path) %}active{% endif %}">
                         <div class="sidebar-nav-icon">
                             <!-- Dashboard SVG -->
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"

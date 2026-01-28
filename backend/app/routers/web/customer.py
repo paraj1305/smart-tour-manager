@@ -14,7 +14,7 @@ from app.utils.flash import flash_redirect
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy import or_
 
-router = APIRouter(prefix="/customers", tags=["Customers"])
+router = APIRouter(tags=["Customers"])
 
 # -------------------------------------------------
 # Helper: render form
@@ -158,7 +158,7 @@ async def create_customer(
 # =================================================
 # EDIT / UPDATE
 # =================================================
-@router.get("/{customer_id}/edit", response_class=HTMLResponse, name="customer_edit_page")
+@router.get("/customers/{customer_id}/edit", response_class=HTMLResponse, name="customer_edit_page")
 def edit_page(
     customer_id: int,
     request: Request,
